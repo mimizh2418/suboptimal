@@ -111,10 +111,10 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   }
 
   // Initialize tableau
-  MatrixXd tableau = MatrixXd::Zero(num_constraints + 1, num_decision_vars + num_constraints + 2);
+  MatrixXd tableau = MatrixXd::Zero(num_constraints + 1, num_decision_vars + num_constraints + 1);
   tableau.topLeftCorner(num_constraints, num_decision_vars) = problem.getConstraintMatrix();
-  tableau.block(0, num_decision_vars, num_constraints + 1, num_constraints + 1) =
-      MatrixXd::Identity(num_constraints + 1, num_constraints + 1);
+  tableau.block(0, num_decision_vars, num_constraints, num_constraints) =
+      MatrixXd::Identity(num_constraints, num_constraints);
   tableau.topRightCorner(num_constraints, 1) = problem.getConstraintRHS();
   tableau.bottomLeftCorner(1, num_decision_vars) = -problem.getObjectiveCoeffs().transpose();
 
@@ -166,7 +166,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
     auto rhs = tableau.col(tableau.cols() - 1);
     for (size_t i = 0; i < basic_vars.size(); i++) {
       if (const Index var_index = basic_vars[i]; var_index < num_decision_vars) {
-        solution(var_index) = rhs(i);
+        solution(var_index) = rhs(static_cast<Index>(i));
       }
     }
     objective_value = tableau(tableau.rows() - 1, tableau.cols() - 1);

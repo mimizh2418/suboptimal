@@ -17,11 +17,11 @@ include(FetchContent)
 find_package(Eigen3 3.4 CONFIG)
 if (NOT Eigen3_FOUND)
     message(STATUS "Eigen3 not found, fetching from gitlab")
-    fetchcontent_declare(
+    FetchContent_Declare(
         Eigen3
         GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
         GIT_TAG 3.4
     )
-    fetchcontent_makeavailable(Eigen3)
+    FetchContent_MakeAvailable(Eigen3)
 endif()
 target_link_libraries(suboptimal PUBLIC Eigen3::Eigen)
