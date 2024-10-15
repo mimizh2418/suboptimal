@@ -43,9 +43,18 @@ const MatrixXd& LinearProblem::getConstraintMatrix() const { return A; }
 const VectorXd& LinearProblem::getConstraintRHS() const { return b; }
 
 std::string LinearProblem::objectiveFunctionString() const {
-  string ret = format("{:.3f}x_1", c(0));
-  for (Index i = 1; i < c.size(); i++) {
-    ret = format("{}{}{:.3f}x_{}", ret, c(i) > 0 ? " + " : " - ", abs(c(i)), i + 1);
+  string ret;
+  bool first = true;
+  for (Index i = 0; i < c.size(); i++) {
+    const double coeff = c(i);
+    if (!first)
+      ret += coeff > 0 ? " + " : " - ";
+    else {
+      if (coeff < 0) ret += "-";
+      first = false;
+    }
+    if (abs(coeff) != 1) ret += format("{}", abs(coeff));
+    ret += format("x_{}", i + 1);
   }
   return ret;
 }
@@ -53,12 +62,20 @@ std::string LinearProblem::objectiveFunctionString() const {
 vector<string> LinearProblem::constraintStrings() const {
   vector<string> ret(num_constraints);
   for (Index i = 0; i < num_constraints; i++) {
-    ret[i] = format("{:.3f}x_1", A(i, 0));
-    for (Index j = 1; j < num_decision_vars; j++) {
-      if (A(i, j) == 0) continue;
-      ret[i] = format("{}{}{:.3f}x_{}", ret[i], A(i, j) > 0 ? " + " : " - ", abs(A(i, j)), j + 1);
+    bool first = true;
+    for (Index j = 0; j < num_decision_vars; j++) {
+      const double coeff = A(i, j);
+      if (coeff == 0) continue;
+      if (!first)
+        ret[i] += coeff > 0 ? " + " : " - ";
+      else {
+        if (coeff < 0) ret[i] += "-";
+        first = false;
+      }
+      if (abs(coeff) != 1) ret[i] += format("{}", abs(coeff));
+      ret[i] += "x_" + to_string(j + 1);
     }
-    ret[i] += format(" ≤ {:.3f}", b(i));
+    ret[i] += format(" ≤ {}", b(i));
   }
   return ret;
 }
