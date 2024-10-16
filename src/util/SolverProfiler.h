@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <Eigen/Sparse>
 
 class SolverProfiler {
  public:
@@ -13,9 +14,9 @@ class SolverProfiler {
     solver_iterations++;
   }
 
-  [[nodiscard]] std::chrono::duration<double, std::milli> getAvgIterationTime() const { return avg_iteration_time; }
+  std::chrono::duration<double, std::milli> getAvgIterationTime() const { return avg_iteration_time; }
 
-  [[nodiscard]] int getNumIterations() const { return solver_iterations; }
+  int getNumIterations() const { return solver_iterations; }
 
  private:
   int solver_iterations = 0;

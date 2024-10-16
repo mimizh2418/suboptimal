@@ -10,8 +10,8 @@ using namespace Eigen;
 
 void solveBasicProblem() {
   const suboptimal::LinearProblem problem = suboptimal::LinearProblem::maximize(VectorXd{{40, 30}})
-                                                .constrainedBy(VectorXd{{1, 1}}, 12)
-                                                .constrainedBy(VectorXd{{2, 1}}, 16);
+                                                .withLessThanConstraint(VectorXd{{1, 1}}, 12)
+                                                .withLessThanConstraint(VectorXd{{2, 1}}, 16);
   suboptimal::SimplexSolverConfig solver_config;
   solver_config.verbose = true;
   VectorXd solution;
@@ -21,9 +21,9 @@ void solveBasicProblem() {
 
 void solveCyclingProblem(const suboptimal::SimplexPivotRule pivot_rule) {
   const suboptimal::LinearProblem problem = suboptimal::LinearProblem::maximize(VectorXd{{10, -57, -9, -24}})
-                                                .constrainedBy(VectorXd{{0.5, -5.5, -2.5, 9}}, 0)
-                                                .constrainedBy(VectorXd{{0.5, -1.5, -0.5, 1}}, 0)
-                                                .constrainedBy(VectorXd{{1, 1, 1, 1}}, 1);
+                                                .withLessThanConstraint(VectorXd{{0.5, -5.5, -2.5, 9}}, 0)
+                                                .withLessThanConstraint(VectorXd{{0.5, -1.5, -0.5, 1}}, 0)
+                                                .withLessThanConstraint(VectorXd{{1, 1, 1, 1}}, 1);
   suboptimal::SimplexSolverConfig solver_config;
   solver_config.pivot_rule = pivot_rule;
   solver_config.verbose = true;
@@ -37,5 +37,4 @@ int main() {
   solveCyclingProblem(suboptimal::SimplexPivotRule::kLexicographic);  // Cycling problem with lexicographic pivot rule
   solveCyclingProblem(suboptimal::SimplexPivotRule::kBland);          // Cycling problem with Bland's pivot rule
   solveCyclingProblem(suboptimal::SimplexPivotRule::kDantzig);  // Cycling problem with Dantzig's pivot rule (fails)
-  return 0;
 }

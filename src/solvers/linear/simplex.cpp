@@ -93,8 +93,11 @@ void pivot(MatrixXd& tableau, span<Index> basic_vars, const Index pivot_row, con
 namespace suboptimal {
 SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, double& objective_value,
                               const SimplexSolverConfig& config) {
+  MatrixXd constraint_matrix;
+  VectorXd constraint_rhs;
+  problem.buildConstraints(constraint_matrix, constraint_rhs);
   const Index num_decision_vars = problem.getObjectiveCoeffs().size();
-  const Index num_constraints = problem.getConstraintMatrix().rows();
+  const Index num_constraints = constraint_matrix.rows();
   if (num_constraints == 0) throw invalid_argument("Problem must have at least one constraint");
 
   SolverExitStatus exit_status;
@@ -103,19 +106,17 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
     cout << "Solving linear problem: " << endl;
     cout << "Maximize: " << problem.objectiveFunctionString() << endl;
     cout << "Subject to: " << endl;
-    const auto constraint_strings = problem.constraintStrings();
-    for (int i = 0; i < num_constraints; i++) {
-      cout << "  " << constraint_strings[i] << endl;
+    for (const auto constraint_strings = problem.constraintStrings();
+         const auto& constraint_string : constraint_strings) {
+      cout << "  " << constraint_string << endl;
     }
     cout << "Using pivot rule: " << toString(config.pivot_rule) << endl << endl;
   }
 
   // Initialize tableau
-  MatrixXd tableau = MatrixXd::Zero(num_constraints + 1, num_decision_vars + num_constraints + 1);
-  tableau.topLeftCorner(num_constraints, num_decision_vars) = problem.getConstraintMatrix();
-  tableau.block(0, num_decision_vars, num_constraints, num_constraints) =
-      MatrixXd::Identity(num_constraints, num_constraints);
-  tableau.topRightCorner(num_constraints, 1) = problem.getConstraintRHS();
+  MatrixXd tableau = MatrixXd::Zero(num_constraints + 1, constraint_matrix.cols() + 1);
+  tableau.topLeftCorner(num_constraints, constraint_matrix.cols()) = constraint_matrix;
+  tableau.topRightCorner(num_constraints, 1) = constraint_rhs;
   tableau.bottomLeftCorner(1, num_decision_vars) = -problem.getObjectiveCoeffs().transpose();
 
   // Initialize basic variables
