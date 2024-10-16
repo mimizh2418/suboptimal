@@ -24,7 +24,7 @@ int findPivotPosition(const MatrixXd& tableau, const span<Index> basic_vars, con
   pivot_row = -1;
 
   // Entering variable selection
-  const auto objective_row = tableau.row(tableau.rows() - 1).head(tableau.cols() - 1);
+  const RowVectorXd objective_row = tableau.row(tableau.rows() - 1).head(tableau.cols() - 1);
   if (pivot_rule == SimplexPivotRule::kBland) {
     // Bland's rule: select the index of the first negative coefficient in the objective row
     for (Index i = 0; i < objective_row.size(); i++) {
@@ -45,7 +45,7 @@ int findPivotPosition(const MatrixXd& tableau, const span<Index> basic_vars, con
 
   // Leaving variable selection
   double min_ratio = numeric_limits<double>::infinity();
-  const auto rhs_col = tableau.col(tableau.cols() - 1).head(tableau.rows() - 1);
+  const RowVectorXd rhs_col = tableau.col(tableau.cols() - 1).head(tableau.rows() - 1);
   for (Index i = 0; i < rhs_col.size(); i++) {
     // Minimum ratio test, find the smallest, non-negative ratio with non-negative pivot element
     if (const double ratio = rhs_col(i) / tableau(i, pivot_col); tableau(i, pivot_col) > 0 && ratio >= 0) {
@@ -54,8 +54,8 @@ int findPivotPosition(const MatrixXd& tableau, const span<Index> basic_vars, con
         pivot_row = i;
       } else if (ratio == min_ratio && pivot_rule == SimplexPivotRule::kLexicographic) {
         // Lexicographic rule: select the variable with the lexicographically smallest row
-        const auto row_candidate = (tableau.row(i) / tableau(i, pivot_col)).eval();
-        const auto current_best_row = (tableau.row(pivot_row) / tableau(pivot_row, pivot_col)).eval();
+        const RowVectorXd row_candidate = tableau.row(i) / tableau(i, pivot_col);
+        const RowVectorXd current_best_row = tableau.row(pivot_row) / tableau(pivot_row, pivot_col);
         if (lexicographical_compare(row_candidate.data(), row_candidate.data() + row_candidate.size(),
                                     current_best_row.data(), current_best_row.data() + current_best_row.size())) {
           pivot_row = i;
@@ -164,7 +164,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   if (exit_status == SolverExitStatus::kSuccess) {
     // Extract solution and objective value
     solution = VectorXd::Zero(num_decision_vars);
-    auto rhs = tableau.col(tableau.cols() - 1);
+    const VectorXd rhs = tableau.col(tableau.cols() - 1);
     for (size_t i = 0; i < basic_vars.size(); i++) {
       if (const Index var_index = basic_vars[i]; var_index < num_decision_vars) {
         solution(var_index) = rhs(static_cast<Index>(i));
