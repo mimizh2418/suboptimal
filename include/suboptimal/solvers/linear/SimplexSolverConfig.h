@@ -1,9 +1,9 @@
 #pragma once
 
-#include "suboptimal/solvers/linear/SimplexPivotRule.h"
-
 #include <chrono>
 #include <limits>
+
+#include "suboptimal/solvers/linear/SimplexPivotRule.h"
 
 namespace suboptimal {
 struct SimplexSolverConfig {
