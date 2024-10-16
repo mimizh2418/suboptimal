@@ -2,6 +2,7 @@
 
 #include <Eigen/Core>
 #include <algorithm>
+#include <gsl/gsl>
 #include <iostream>
 #include <limits>
 #include <span>
@@ -167,7 +168,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
     const VectorXd rhs = tableau.col(tableau.cols() - 1);
     for (size_t i = 0; i < basic_vars.size(); i++) {
       if (const Index var_index = basic_vars[i]; var_index < num_decision_vars) {
-        solution(var_index) = rhs(static_cast<Index>(i));
+        solution(var_index) = rhs(gsl::narrow<Index>(i));
       }
     }
     objective_value = tableau(tableau.rows() - 1, tableau.cols() - 1);

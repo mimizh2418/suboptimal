@@ -2,6 +2,7 @@
 
 #include <Eigen/Core>
 #include <format>
+#include <gsl/narrow>
 #include <iostream>
 #include <stdexcept>
 #include <string>
@@ -55,8 +56,8 @@ void LinearProblem::addConstraintImpl(const VectorXd& constraint_coeffs, const d
 const VectorXd& LinearProblem::getObjectiveCoeffs() const { return objective_coeffs; }
 
 void LinearProblem::buildConstraints(MatrixXd& constraint_matrix, VectorXd& constraint_rhs) const {
-  const auto num_slack_vars = static_cast<Index>(greater_than_constraints.size() + less_than_constraints.size());
-  const auto num_artificial_vars = static_cast<Index>(equality_constraints.size() + greater_than_constraints.size());
+  const auto num_slack_vars = gsl::narrow<Index>(greater_than_constraints.size() + less_than_constraints.size());
+  const auto num_artificial_vars = gsl::narrow<Index>(equality_constraints.size() + greater_than_constraints.size());
   constraint_matrix = MatrixXd::Zero(num_constraints, num_decision_vars + num_slack_vars + num_artificial_vars);
   constraint_rhs = VectorXd::Zero(num_constraints);
 
