@@ -1,10 +1,7 @@
-#include <iostream>
-
 #include "suboptimal/solvers/linear/SimplexPivotRule.h"
 #include "suboptimal/solvers/linear/SimplexSolverConfig.h"
 #include "suboptimal/solvers/linear/simplex.h"
 
-// using namespace std;
 using namespace Eigen;
 
 void solveBasicProblem() {
