@@ -15,7 +15,7 @@ class SolverProfiler {
 
   std::chrono::duration<double, std::milli> getAvgIterationTime() const { return avg_iteration_time; }
 
-  int getNumIterations() const { return solver_iterations; }
+  int numIterations() const { return solver_iterations; }
 
  private:
   int solver_iterations = 0;

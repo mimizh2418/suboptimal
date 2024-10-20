@@ -16,10 +16,17 @@ class LinearProblem {
   const Eigen::VectorXd& getObjectiveCoeffs() const;
 
   void buildConstraints(Eigen::MatrixXd& constraint_matrix, Eigen::VectorXd& constraint_rhs) const;
-  Eigen::Index getNumConstraints() const { return num_constraints; }
-  Eigen::Index getNumEqualityConstraints() const { return gsl::narrow<Eigen::Index>(equality_constraints.size()); }
-  Eigen::Index getNumLessThanConstraints() const { return gsl::narrow<Eigen::Index>(less_than_constraints.size()); }
-  Eigen::Index getGreaterThanConstraints() const { return gsl::narrow<Eigen::Index>(greater_than_constraints.size()); }
+
+  bool hasInitialBFS() const { return equality_constraints.empty() && greater_than_constraints.empty(); }
+
+  Eigen::Index numDecisionVars() const { return num_decision_vars; }
+  Eigen::Index numConstraints() const { return num_constraints; }
+  Eigen::Index numSlackVars() const { return numLessThanConstraints() + numGreaterThanConstraints(); }
+  Eigen::Index numArtificialVars() const { return numEqualityConstraints() + numGreaterThanConstraints(); }
+
+  Eigen::Index numEqualityConstraints() const { return gsl::narrow<Eigen::Index>(equality_constraints.size()); }
+  Eigen::Index numLessThanConstraints() const { return gsl::narrow<Eigen::Index>(less_than_constraints.size()); }
+  Eigen::Index numGreaterThanConstraints() const { return gsl::narrow<Eigen::Index>(greater_than_constraints.size()); }
 
   std::string objectiveFunctionString() const;
   std::vector<std::string> constraintStrings() const;
