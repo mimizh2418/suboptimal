@@ -36,7 +36,7 @@ void solveDegenerate2PhaseProblem() {
                            .withEqualityConstraint(VectorXd{{1, 1, 1, 0}}, 5);
   suboptimal::SimplexSolverConfig solver_config;
   solver_config.verbose = true;
-  solver_config.pivot_rule = suboptimal::SimplexPivotRule::kBland;
+  solver_config.pivot_rule = suboptimal::SimplexPivotRule::kLexicographic;
   VectorXd solution;
   double objective_value;
   solveSimplex(problem, solution, objective_value, solver_config);
