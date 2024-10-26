@@ -2,6 +2,7 @@
 
 #include <Eigen/Core>
 #include <format>
+#include <gsl/narrow>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -14,42 +15,48 @@ using namespace Eigen;
 
 LinearProblem::LinearProblem(const VectorXd& objective_coeffs)
     : objective_coeffs(objective_coeffs), num_decision_vars(objective_coeffs.size()) {
-  if (objective_coeffs.size() < 1) throw invalid_argument("Objective function must have at least one coefficient");
-  if ((objective_coeffs.array() == 0).any()) throw invalid_argument("Objective function coefficients must be non-zero");
+  if (objective_coeffs.size() < 1) {
+    throw invalid_argument("Objective function must have at least one coefficient");
+  }
+  if ((objective_coeffs.array() == 0).any()) {
+    throw invalid_argument("Objective function coefficients must be non-zero");
+  }
 }
 
-LinearProblem LinearProblem::maximize(const VectorXd& objective_coeffs) { return LinearProblem(objective_coeffs); }
+LinearProblem LinearProblem::maximizationProblem(const VectorXd& objective_coeffs) {
+  return LinearProblem(objective_coeffs);
+}
 
-LinearProblem& LinearProblem::withLessThanConstraint(const VectorXd& constraint_coeffs, const double rhs) {
+void LinearProblem::addLessThanConstraint(const VectorXd& constraint_coeffs, const double rhs) {
   addConstraintImpl(constraint_coeffs, rhs, -1);
-  return *this;
 }
 
-LinearProblem& LinearProblem::withGreaterThanConstraint(const VectorXd& constraint_coeffs, const double rhs) {
+void LinearProblem::addGreaterThanConstraint(const VectorXd& constraint_coeffs, const double rhs) {
   addConstraintImpl(constraint_coeffs, rhs, 1);
-  return *this;
 }
 
-LinearProblem& LinearProblem::withEqualityConstraint(const VectorXd& constraint_coeffs, const double rhs) {
+void LinearProblem::addEqualityConstraint(const VectorXd& constraint_coeffs, const double rhs) {
   addConstraintImpl(constraint_coeffs, rhs, 0);
-  return *this;
 }
 
 void LinearProblem::addConstraintImpl(const VectorXd& constraint_coeffs, const double rhs, const int constraint_type) {
-  if (constraint_coeffs.size() != num_decision_vars)
+  if (constraint_coeffs.size() != num_decision_vars) {
     throw invalid_argument("Constraint coefficients must have same dimension as decision variables");
+  }
 
   VectorXd new_constraint(constraint_coeffs.size() + 1);
   new_constraint.head(num_decision_vars) = constraint_coeffs;
   new_constraint(num_decision_vars) = rhs;
-  if (constraint_type == 0) equality_constraints.push_back(new_constraint);
-  if (constraint_type < 0) less_than_constraints.push_back(new_constraint);
-  if (constraint_type > 0) greater_than_constraints.push_back(new_constraint);
+  if (constraint_type == 0) {
+    equality_constraints.push_back(new_constraint);
+  } else if (constraint_type < 0) {
+    less_than_constraints.push_back(new_constraint);
+  } else if (constraint_type > 0) {
+    greater_than_constraints.push_back(new_constraint);
+  }
 
   num_constraints++;
 }
-
-const VectorXd& LinearProblem::getObjectiveCoeffs() const { return objective_coeffs; }
 
 void LinearProblem::buildConstraints(MatrixXd& constraint_matrix, VectorXd& constraint_rhs) const {
   const Index num_slack_vars = numLessThanConstraints() + numGreaterThanConstraints();
@@ -82,7 +89,21 @@ void LinearProblem::buildConstraints(MatrixXd& constraint_matrix, VectorXd& cons
   }
 }
 
-std::string LinearProblem::objectiveFunctionString() const { return expressionFromCoeffs(objective_coeffs, "x"); }
+Index LinearProblem::numEqualityConstraints() const {
+  return gsl::narrow<Index>(equality_constraints.size());
+}
+
+Index LinearProblem::numLessThanConstraints() const {
+  return gsl::narrow<Index>(less_than_constraints.size());
+}
+
+Index LinearProblem::numGreaterThanConstraints() const {
+  return gsl::narrow<Index>(greater_than_constraints.size());
+}
+
+std::string LinearProblem::objectiveFunctionString() const {
+  return expressionFromCoeffs(objective_coeffs, "x");
+}
 
 vector<string> LinearProblem::constraintStrings() const {
   vector<string> ret(num_constraints);

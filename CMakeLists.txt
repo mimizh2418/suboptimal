@@ -4,6 +4,8 @@ project(suboptimal)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 file(GLOB_RECURSE SOURCES "${CMAKE_HOME_DIRECTORY}/src/*.cpp")
 
 add_executable(suboptimal ${SOURCES})

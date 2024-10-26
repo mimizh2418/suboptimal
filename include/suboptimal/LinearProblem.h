@@ -1,19 +1,19 @@
 #pragma once
 
 #include <Eigen/Core>
-#include <gsl/narrow>
 #include <string>
 #include <vector>
 
 namespace suboptimal {
 class LinearProblem {
  public:
-  static LinearProblem maximize(const Eigen::VectorXd& objective_coeffs);
-  LinearProblem& withLessThanConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
-  LinearProblem& withGreaterThanConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
-  LinearProblem& withEqualityConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
+  static LinearProblem maximizationProblem(const Eigen::VectorXd& objective_coeffs);
 
-  const Eigen::VectorXd& getObjectiveCoeffs() const;
+  void addLessThanConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
+  void addGreaterThanConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
+  void addEqualityConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
+
+  const Eigen::VectorXd& getObjectiveCoeffs() const { return objective_coeffs; }
 
   void buildConstraints(Eigen::MatrixXd& constraint_matrix, Eigen::VectorXd& constraint_rhs) const;
 
@@ -24,9 +24,9 @@ class LinearProblem {
   Eigen::Index numSlackVars() const { return numLessThanConstraints() + numGreaterThanConstraints(); }
   Eigen::Index numArtificialVars() const { return numEqualityConstraints() + numGreaterThanConstraints(); }
 
-  Eigen::Index numEqualityConstraints() const { return gsl::narrow<Eigen::Index>(equality_constraints.size()); }
-  Eigen::Index numLessThanConstraints() const { return gsl::narrow<Eigen::Index>(less_than_constraints.size()); }
-  Eigen::Index numGreaterThanConstraints() const { return gsl::narrow<Eigen::Index>(greater_than_constraints.size()); }
+  Eigen::Index numEqualityConstraints() const;
+  Eigen::Index numLessThanConstraints() const;
+  Eigen::Index numGreaterThanConstraints() const;
 
   std::string objectiveFunctionString() const;
   std::vector<std::string> constraintStrings() const;

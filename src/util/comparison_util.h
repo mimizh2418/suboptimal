@@ -1,5 +1,6 @@
 #pragma once
 
+#include <gsl/assert>
 #include <limits>
 
 template <typename T>
@@ -11,7 +12,9 @@ bool isApprox(T a, T b, T epsilon = std::numeric_limits<T>::epsilon(),
   Expects(epsilon >= std::numeric_limits<T>::epsilon() && epsilon <= 1);
   Expects(abs_thresh >= 0);
 
-  if (a == b) return true;
+  if (a == b) {
+    return true;
+  }
   T norm = std::min(std::abs(a + b), std::numeric_limits<T>::max());
   return std::abs(a - b) <= std::max(abs_thresh, epsilon * norm);
 }

@@ -27,48 +27,59 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
   if (pivot_rule == SimplexPivotRule::kBland) {
     // Bland's rule: select the index of the first negative coefficient in the objective row
     for (Index i = 0; i < objective_row.size(); i++) {
-      if (approxLT<double>(objective_row(i), 0)) {
-        pivot_col = i;
-        break;
+      if (approxGEQ<double>(objective_row(i), 0)) {
+        continue;
       }
+      pivot_col = i;
+      break;
     }
   } else if (pivot_rule == SimplexPivotRule::kLexicographic || pivot_rule == SimplexPivotRule::kDantzig) {
     // Dantzig's or lexicographic rule: select the index of the most negative coefficient in the objective row
     Index smallest_idx;
-    if (const double smallest_coeff = objective_row.minCoeff(&smallest_idx); approxLT<double>(smallest_coeff, 0))
+    if (const double smallest_coeff = objective_row.minCoeff(&smallest_idx); approxLT<double>(smallest_coeff, 0)) {
       pivot_col = smallest_idx;
+    }
   }
 
   // If no negative coefficients are found, the solution is optimal
-  if (pivot_col == -1) return 1;
+  if (pivot_col == -1) {
+    return 1;
+  }
 
   // Leaving variable selection
   double min_ratio = numeric_limits<double>::infinity();
   const auto rhs_col = tableau.col(tableau.cols() - 1).head(tableau.rows() - 1);
   for (Index i = 0; i < rhs_col.size(); i++) {
-    // Minimum ratio test, find the smallest, non-negative ratio with non-negative pivot element
-    if (const double ratio = rhs_col(i) / tableau(i, pivot_col);
-        approxGT<double>(tableau(i, pivot_col), 0) && approxGEQ<double>(ratio, 0)) {
-      if (approxLT<double>(ratio, min_ratio)) {
-        min_ratio = ratio;
+    const double ratio = rhs_col(i) / tableau(i, pivot_col);
+    // Pivot element cannot be 0 and ratio cannot be negative
+    if (approxLEQ<double>(tableau(i, pivot_col), 0) || approxLT<double>(ratio, 0)) {
+      continue;
+    }
+
+    // Minimum ratio test
+    if (approxLT<double>(ratio, min_ratio)) {
+      min_ratio = ratio;
+      pivot_row = i;
+    } else if (isApprox<double>(ratio, min_ratio) && pivot_rule == SimplexPivotRule::kLexicographic) {
+      // Lexicographic rule: select the variable with the lexicographically smallest row
+      const RowVectorXd row_candidate = tableau.row(i) / tableau(i, pivot_col);
+      const RowVectorXd current_best_row = tableau.row(pivot_row) / tableau(pivot_row, pivot_col);
+      if (lexicographical_compare(row_candidate.data(), row_candidate.data() + row_candidate.size(),
+                                  current_best_row.data(), current_best_row.data() + current_best_row.size())) {
         pivot_row = i;
-      } else if (isApprox<double>(ratio, min_ratio) && pivot_rule == SimplexPivotRule::kLexicographic) {
-        // Lexicographic rule: select the variable with the lexicographically smallest row
-        const RowVectorXd row_candidate = tableau.row(i) / tableau(i, pivot_col);
-        const RowVectorXd current_best_row = tableau.row(pivot_row) / tableau(pivot_row, pivot_col);
-        if (lexicographical_compare(row_candidate.data(), row_candidate.data() + row_candidate.size(),
-                                    current_best_row.data(), current_best_row.data() + current_best_row.size())) {
-          pivot_row = i;
-        }
-      } else if (isApprox<double>(ratio, min_ratio) && pivot_rule == SimplexPivotRule::kBland) {
-        // Bland's rule: select the basic variable with the smallest index
-        if (basic_vars(i) < basic_vars(pivot_row)) pivot_row = i;
+      }
+    } else if (isApprox<double>(ratio, min_ratio) && pivot_rule == SimplexPivotRule::kBland) {
+      // Bland's rule: select the basic variable with the smallest index
+      if (basic_vars(i) < basic_vars(pivot_row)) {
+        pivot_row = i;
       }
     }
   }
 
   // If no valid pivot is found, the problem is unbounded
-  if (pivot_row == -1) return -1;
+  if (pivot_row == -1) {
+    return -1;
+  }
 
   // Valid pivot found
   return 0;
@@ -79,7 +90,9 @@ void pivot(MatrixXd& tableau, VectorX<Index>& basic_vars, const Index pivot_row,
   tableau.row(pivot_row) /= pivot_element;
   tableau(pivot_row, pivot_col) = 1;  // Account for floating point errors
   for (Index i = 0; i < tableau.rows(); i++) {
-    if (i == pivot_row || isApprox<double>(tableau(i, pivot_col), 0)) continue;
+    if (i == pivot_row || isApprox<double>(tableau(i, pivot_col), 0)) {
+      continue;
+    }
     tableau.row(i) -= tableau(i, pivot_col) * tableau.row(pivot_row);
     tableau(i, pivot_col) = 0;  // Account for floating point errors
   }
@@ -92,8 +105,9 @@ VectorX<Index> findBasicVars(const MatrixXd& tableau) {
   for (Index i = 0; i < tableau.cols(); i++) {
     const auto col = tableau.col(i);
     Index max_index;
-    if (isApprox<double>(col.lpNorm<1>(), 1) && isApprox<double>(col.maxCoeff(&max_index), 1))
+    if (isApprox<double>(col.lpNorm<1>(), 1) && isApprox<double>(col.maxCoeff(&max_index), 1)) {
       basic_vars(max_index) = i;
+    }
   }
   return basic_vars;
 }
@@ -138,7 +152,9 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   MatrixXd constraint_matrix;
   VectorXd constraint_rhs;
   problem.buildConstraints(constraint_matrix, constraint_rhs);
-  if (problem.numConstraints() == 0) throw invalid_argument("Problem must have at least one constraint");
+  if (problem.numConstraints() == 0) {
+    throw invalid_argument("Problem must have at least one constraint");
+  }
 
   if (config.verbose) {
     cout << "Solving linear problem: " << endl;
@@ -158,7 +174,9 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   tableau.bottomLeftCorner(1, problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
 
   if (!problem.hasInitialBFS()) {
-    if (config.verbose) cout << "No trivial BFS found, solving auxiliary LP" << endl;
+    if (config.verbose) {
+      cout << "No trivial BFS found, solving auxiliary LP" << endl;
+    }
 
     // Set up auxiliary LP
     const Index num_artificial_vars = problem.numEqualityConstraints() + problem.numGreaterThanConstraints();
@@ -195,7 +213,9 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
     }
 
     if (aux_exit == SolverExitStatus::kMaxIterationsExceeded) {
-      if (config.verbose) cout << "Max iterations exceeded while solving auxiliary LP" << endl;
+      if (config.verbose) {
+        cout << "Max iterations exceeded while solving auxiliary LP" << endl;
+      }
       return aux_exit;
     }
     if (aux_exit == SolverExitStatus::kUnbounded ||
@@ -246,7 +266,9 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
     }
   }
 
-  if (config.verbose) cout << endl;
+  if (config.verbose) {
+    cout << endl;
+  }
 
   return exit_status;
 }
