@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
 #include <string>
@@ -16,7 +18,7 @@ enum class SolverExitStatus {
   kTimeout
 };
 
-inline std::string toString(const SolverExitStatus& status) {
+constexpr std::string toString(const SolverExitStatus& status) {
   switch (status) {
     case SolverExitStatus::kSuccess:
       return "solver found an optimal solution";

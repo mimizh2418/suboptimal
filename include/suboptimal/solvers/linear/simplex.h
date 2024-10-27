@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
 #include <Eigen/Core>

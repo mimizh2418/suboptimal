@@ -1,8 +1,11 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
-#include <Eigen/Core>
 #include <format>
 #include <string>
+
+#include <Eigen/Core>
 
 inline std::string expressionFromCoeffs(const Eigen::VectorXd& coeffs, const std::string& variable_name) {
   std::string ret;

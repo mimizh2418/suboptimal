@@ -7,4 +7,5 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 ColumnLimit: 120
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
+SortIncludes: Never
 Standard: c++20

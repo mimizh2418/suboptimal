@@ -1,10 +1,13 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #include "suboptimal/solvers/linear/simplex.h"
 
-#include <Eigen/Core>
 #include <algorithm>
 #include <iostream>
 #include <limits>
 #include <stdexcept>
+
+#include <Eigen/Core>
 
 #include "suboptimal/LinearProblem.h"
 #include "suboptimal/solvers/SolverExitStatus.h"
@@ -15,7 +18,6 @@
 
 using namespace suboptimal;
 using namespace Eigen;
-using namespace std;
 
 int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars, const SimplexPivotRule pivot_rule,
                       Index& pivot_row, Index& pivot_col) {
@@ -47,7 +49,7 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
   }
 
   // Leaving variable selection
-  double min_ratio = numeric_limits<double>::infinity();
+  double min_ratio = std::numeric_limits<double>::infinity();
   const auto rhs_col = tableau.col(tableau.cols() - 1).head(tableau.rows() - 1);
   for (Index i = 0; i < rhs_col.size(); i++) {
     const double ratio = rhs_col(i) / tableau(i, pivot_col);
@@ -64,8 +66,8 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
       // Lexicographic rule: select the variable with the lexicographically smallest row
       const RowVectorXd row_candidate = tableau.row(i) / tableau(i, pivot_col);
       const RowVectorXd current_best_row = tableau.row(pivot_row) / tableau(pivot_row, pivot_col);
-      if (ranges::lexicographical_compare(row_candidate, current_best_row,
-                                          [](const double a, const double b) { return approxLT<double>(a, b); })) {
+      if (std::ranges::lexicographical_compare(row_candidate, current_best_row,
+                                               [](const double a, const double b) { return approxLT<double>(a, b); })) {
         pivot_row = i;
       }
     } else if (isApprox<double>(ratio, min_ratio) && pivot_rule == SimplexPivotRule::kBland) {
@@ -153,18 +155,18 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   VectorXd constraint_rhs;
   problem.buildConstraints(constraint_matrix, constraint_rhs);
   if (problem.numConstraints() == 0) {
-    throw invalid_argument("Problem must have at least one constraint");
+    throw std::invalid_argument("Problem must have at least one constraint");
   }
 
   if (config.verbose) {
-    cout << "Solving linear problem: " << endl;
-    cout << "Maximize: " << problem.objectiveFunctionString() << endl;
-    cout << "Subject to: " << endl;
+    std::cout << "Solving linear problem: " << std::endl;
+    std::cout << "Maximize: " << problem.objectiveFunctionString() << std::endl;
+    std::cout << "Subject to: " << std::endl;
     for (const auto constraint_strings = problem.constraintStrings();
          const auto& constraint_string : constraint_strings) {
-      cout << "  " << constraint_string << endl;
+      std::cout << "  " << constraint_string << std::endl;
     }
-    cout << "Using pivot rule: " << toString(config.pivot_rule) << endl << endl;
+    std::cout << "Using pivot rule: " << toString(config.pivot_rule) << std::endl << std::endl;
   }
 
   // Initialize tableau
@@ -175,7 +177,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
 
   if (!problem.hasInitialBFS()) {
     if (config.verbose) {
-      cout << "No trivial BFS found, solving auxiliary LP" << endl;
+      std::cout << "No trivial BFS found, solving auxiliary LP" << std::endl;
     }
 
     // Set up auxiliary LP
@@ -206,21 +208,22 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
 
     if (config.verbose) {
       const auto total_time = aux_profiler.getAvgIterationTime() * aux_profiler.numIterations();
-      cout << format("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
-                     aux_profiler.numIterations(), aux_profiler.getAvgIterationTime().count())
-           << endl
-           << endl;
+      std::cout << std::format("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)",
+                               total_time.count(), aux_profiler.numIterations(),
+                               aux_profiler.getAvgIterationTime().count())
+                << std::endl
+                << std::endl;
     }
 
     if (aux_exit == SolverExitStatus::kMaxIterationsExceeded) {
       if (config.verbose) {
-        cout << "Max iterations exceeded while solving auxiliary LP" << endl;
+        std::cout << "Max iterations exceeded while solving auxiliary LP" << std::endl;
       }
       return aux_exit;
     }
     if (aux_exit == SolverExitStatus::kUnbounded ||
         !isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0)) {
-      cout << "The problem is infeasible" << endl;
+      std::cout << "The problem is infeasible" << std::endl;
       return SolverExitStatus::kInfeasible;
     }
 
@@ -240,10 +243,10 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
 
   if (config.verbose) {
     const auto total_time = profiler.getAvgIterationTime() * profiler.numIterations();
-    cout << format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
-                   profiler.numIterations(), profiler.getAvgIterationTime().count())
-         << endl
-         << "Status: " << toString(exit_status) << endl;
+    std::cout << std::format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
+                             profiler.numIterations(), profiler.getAvgIterationTime().count())
+              << std::endl
+              << "Status: " << toString(exit_status) << std::endl;
   }
 
   if (exit_status == SolverExitStatus::kSuccess) {
@@ -258,16 +261,16 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
     objective_value = tableau(tableau.rows() - 1, tableau.cols() - 1);
 
     if (config.verbose) {
-      cout << "Solution: " << endl;
+      std::cout << "Solution: " << std::endl;
       for (Index i = 0; i < problem.numDecisionVars(); i++) {
-        cout << "  x_" << i + 1 << " = " << solution(i) << endl;
+        std::cout << "  x_" << i + 1 << " = " << solution(i) << std::endl;
       }
-      cout << "Objective value: " << objective_value << endl;
+      std::cout << "Objective value: " << objective_value << std::endl;
     }
   }
 
   if (config.verbose) {
-    cout << endl;
+    std::cout << std::endl;
   }
 
   return exit_status;

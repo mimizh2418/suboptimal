@@ -1,8 +1,12 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
-#include <gsl/assert>
-#include <limits>
+#include <algorithm>
 #include <cmath>
+#include <limits>
+
+#include <gsl/assert>
 
 template <typename T>
 concept ComparableFloat = std::is_floating_point_v<T>;

@@ -1,8 +1,11 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
-#include <Eigen/Core>
 #include <string>
 #include <vector>
+
+#include <Eigen/Core>
 
 namespace suboptimal {
 class LinearProblem {

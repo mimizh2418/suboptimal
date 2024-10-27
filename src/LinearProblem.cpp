@@ -1,25 +1,27 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #include "suboptimal/LinearProblem.h"
 
-#include <Eigen/Core>
 #include <format>
-#include <gsl/narrow>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include <Eigen/Core>
+#include <gsl/narrow>
+
 #include "util/expression_util.h"
 
 using namespace suboptimal;
-using namespace std;
 using namespace Eigen;
 
 LinearProblem::LinearProblem(const VectorXd& objective_coeffs)
     : objective_coeffs(objective_coeffs), num_decision_vars(objective_coeffs.size()) {
   if (objective_coeffs.size() < 1) {
-    throw invalid_argument("Objective function must have at least one coefficient");
+    throw std::invalid_argument("Objective function must have at least one coefficient");
   }
   if ((objective_coeffs.array() == 0).any()) {
-    throw invalid_argument("Objective function coefficients must be non-zero");
+    throw std::invalid_argument("Objective function coefficients must be non-zero");
   }
 }
 
@@ -41,7 +43,7 @@ void LinearProblem::addEqualityConstraint(const VectorXd& constraint_coeffs, con
 
 void LinearProblem::addConstraintImpl(const VectorXd& constraint_coeffs, const double rhs, const int constraint_type) {
   if (constraint_coeffs.size() != num_decision_vars) {
-    throw invalid_argument("Constraint coefficients must have same dimension as decision variables");
+    throw std::invalid_argument("Constraint coefficients must have same dimension as decision variables");
   }
 
   VectorXd new_constraint(constraint_coeffs.size() + 1);
@@ -105,21 +107,21 @@ std::string LinearProblem::objectiveFunctionString() const {
   return expressionFromCoeffs(objective_coeffs, "x");
 }
 
-vector<string> LinearProblem::constraintStrings() const {
-  vector<string> ret(num_constraints);
+std::vector<std::string> LinearProblem::constraintStrings() const {
+  std::vector<std::string> ret(num_constraints);
   size_t current_constraint_index = 0;
   for (size_t i = 0; i < equality_constraints.size(); i++, current_constraint_index++) {
     ret[current_constraint_index] = expressionFromCoeffs(equality_constraints[i].head(num_decision_vars).eval(), "x");
-    ret[current_constraint_index] += format(" = {}", equality_constraints[i](num_decision_vars));
+    ret[current_constraint_index] += std::format(" = {}", equality_constraints[i](num_decision_vars));
   }
   for (size_t i = 0; i < less_than_constraints.size(); i++, current_constraint_index++) {
     ret[current_constraint_index] = expressionFromCoeffs(less_than_constraints[i].head(num_decision_vars).eval(), "x");
-    ret[current_constraint_index] += format(" ≤ {}", less_than_constraints[i](num_decision_vars));
+    ret[current_constraint_index] += std::format(" ≤ {}", less_than_constraints[i](num_decision_vars));
   }
   for (size_t i = 0; i < greater_than_constraints.size(); i++, current_constraint_index++) {
     ret[current_constraint_index] =
         expressionFromCoeffs(greater_than_constraints[i].head(num_decision_vars).eval(), "x");
-    ret[current_constraint_index] += format(" ≥ {}", greater_than_constraints[i](num_decision_vars));
+    ret[current_constraint_index] += std::format(" ≥ {}", greater_than_constraints[i](num_decision_vars));
   }
   return ret;
 }

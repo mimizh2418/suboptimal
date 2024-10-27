@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
 #include <string>
@@ -12,7 +14,7 @@ enum class SimplexPivotRule {
   kLexicographic
 };
 
-inline std::string toString(const SimplexPivotRule& rule) {
+constexpr std::string toString(const SimplexPivotRule& rule) {
   switch (rule) {
     case SimplexPivotRule::kDantzig:
       return "Dantzig";

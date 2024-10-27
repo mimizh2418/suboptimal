@@ -1,3 +1,5 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #include "suboptimal/solvers/linear/SimplexPivotRule.h"
 #include "suboptimal/solvers/linear/SimplexSolverConfig.h"
 #include "suboptimal/solvers/linear/simplex.h"
