@@ -2,6 +2,7 @@
 
 #include <gsl/assert>
 #include <limits>
+#include <cmath>
 
 template <typename T>
 concept ComparableFloat = std::is_floating_point_v<T>;

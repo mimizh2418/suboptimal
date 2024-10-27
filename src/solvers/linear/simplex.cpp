@@ -64,8 +64,8 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
       // Lexicographic rule: select the variable with the lexicographically smallest row
       const RowVectorXd row_candidate = tableau.row(i) / tableau(i, pivot_col);
       const RowVectorXd current_best_row = tableau.row(pivot_row) / tableau(pivot_row, pivot_col);
-      if (lexicographical_compare(row_candidate.data(), row_candidate.data() + row_candidate.size(),
-                                  current_best_row.data(), current_best_row.data() + current_best_row.size())) {
+      if (ranges::lexicographical_compare(row_candidate, current_best_row,
+                                          [](const double a, const double b) { return approxLT<double>(a, b); })) {
         pivot_row = i;
       }
     } else if (isApprox<double>(ratio, min_ratio) && pivot_rule == SimplexPivotRule::kBland) {
