@@ -9,4 +9,5 @@ cppSrcFileInclude {
 includeOtherLibs {
   ^Eigen/
   ^gsl/
+  ^catch2/
 }

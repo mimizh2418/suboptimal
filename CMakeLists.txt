@@ -8,13 +8,17 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 file(GLOB_RECURSE SOURCES "${CMAKE_HOME_DIRECTORY}/src/*.cpp")
 
-add_executable(suboptimal ${SOURCES})
+add_library(suboptimal ${SOURCES})
 
-target_include_directories(suboptimal PUBLIC "${CMAKE_HOME_DIRECTORY}/include")
-target_include_directories(suboptimal PRIVATE "${CMAKE_HOME_DIRECTORY}/src")
+target_include_directories(
+    suboptimal
+    PUBLIC "${CMAKE_SOURCE_DIR}/include"
+    PRIVATE "${CMAKE_SOURCE_DIR}/src"
+)
 
 target_compile_options(suboptimal PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
+include(CTest)
 include(FetchContent)
 
 find_package(Microsoft.GSL CONFIG)
@@ -41,3 +45,25 @@ if(NOT Eigen3_FOUND)
     fetchcontent_makeavailable(Eigen3)
 endif()
 target_link_libraries(suboptimal PUBLIC Eigen3::Eigen)
+
+if(BUILD_TESTING)
+    file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/test/*.cpp")
+    add_executable(tests ${TEST_SOURCES})
+    target_compile_options(tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+
+    find_package(Catch2 3.7.0 CONFIG)
+    if(NOT Catch2_FOUND)
+        message(STATUS "Catch2 not found, fetching from GitHub")
+        fetchcontent_declare(
+            Catch2
+            GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
+            GIT_TAG "v3.7.0"
+        )
+        fetchcontent_makeavailable(Catch2)
+        list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
+    endif()
+    target_link_libraries(tests PRIVATE suboptimal Catch2::Catch2WithMain)
+
+    include(Catch)
+    catch_discover_tests(tests)
+endif()

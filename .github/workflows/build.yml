@@ -1,9 +1,9 @@
-name: Build
+name: Build and test
 
 on: [pull_request, push]
 
 env:
-  BUILD_TYPE: Debug
+  BUILD_TYPE: RelWithDebInfo
 
 jobs:
   build:
@@ -22,3 +22,6 @@ jobs:
 
     - name: Build
       run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      run: ctest --test-dir -C ${{env.BUILD_TYPE}} --output-on-failure
