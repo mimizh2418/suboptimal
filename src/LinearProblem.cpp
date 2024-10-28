@@ -70,20 +70,20 @@ void LinearProblem::buildConstraints(MatrixXd& constraint_matrix, VectorXd& cons
   Index slack_var_index = num_decision_vars;
   Index artificial_var_index = num_decision_vars + num_slack_vars;
   for (size_t i = 0; i < less_than_constraints.size(); i++, current_row_index++, slack_var_index++) {
-    auto current_row = constraint_matrix.row(current_row_index);
+    MatrixXd::RowXpr current_row = constraint_matrix.row(current_row_index);
     constraint_rhs(current_row_index) = less_than_constraints[i](num_decision_vars);
     current_row.head(num_decision_vars) = less_than_constraints[i].head(num_decision_vars);
     current_row(slack_var_index) = 1;
   }
   for (size_t i = 0; i < equality_constraints.size(); i++, current_row_index++, artificial_var_index++) {
-    auto current_row = constraint_matrix.row(current_row_index);
+    MatrixXd::RowXpr current_row = constraint_matrix.row(current_row_index);
     constraint_rhs(current_row_index) = equality_constraints[i](num_decision_vars);
     current_row.head(num_decision_vars) = equality_constraints[i].head(num_decision_vars);
     current_row(artificial_var_index) = 1;
   }
   for (size_t i = 0; i < greater_than_constraints.size();
        i++, current_row_index++, slack_var_index++, artificial_var_index++) {
-    auto current_row = constraint_matrix.row(current_row_index);
+    MatrixXd::RowXpr current_row = constraint_matrix.row(current_row_index);
     constraint_rhs(current_row_index) = greater_than_constraints[i](num_decision_vars);
     current_row.head(num_decision_vars) = greater_than_constraints[i].head(num_decision_vars);
     current_row(slack_var_index) = -1;

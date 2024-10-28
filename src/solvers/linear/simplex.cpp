@@ -25,7 +25,9 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
   pivot_row = -1;
 
   // Entering variable selection
-  const auto objective_row = tableau.row(tableau.rows() - 1).head(tableau.cols() - 1);
+  // TODO: is there a less scuffed typedef for this?
+  const MatrixXd::ConstRowXpr::ConstSegmentReturnType objective_row =
+      tableau.row(tableau.rows() - 1).head(tableau.cols() - 1);
   if (pivot_rule == SimplexPivotRule::kBland) {
     // Bland's rule: select the index of the first negative coefficient in the objective row
     for (Index i = 0; i < objective_row.size(); i++) {
@@ -50,7 +52,8 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
 
   // Leaving variable selection
   double min_ratio = std::numeric_limits<double>::infinity();
-  const auto rhs_col = tableau.col(tableau.cols() - 1).head(tableau.rows() - 1);
+  const MatrixXd::ConstColXpr::ConstSegmentReturnType rhs_col =
+      tableau.col(tableau.cols() - 1).head(tableau.rows() - 1);
   for (Index i = 0; i < rhs_col.size(); i++) {
     const double ratio = rhs_col(i) / tableau(i, pivot_col);
     // Pivot element cannot be 0 and ratio cannot be negative
@@ -105,7 +108,7 @@ void pivot(MatrixXd& tableau, VectorX<Index>& basic_vars, const Index pivot_row,
 VectorX<Index> findBasicVars(const MatrixXd& tableau) {
   VectorX<Index> basic_vars = VectorX<Index>::Zero(tableau.rows() - 1);
   for (Index i = 0; i < tableau.cols(); i++) {
-    const auto col = tableau.col(i);
+    const MatrixXd::ConstColXpr col = tableau.col(i);
     Index max_index;
     if (isApprox<double>(col.lpNorm<1>(), 1) && isApprox<double>(col.maxCoeff(&max_index), 1)) {
       basic_vars(max_index) = i;
@@ -189,7 +192,8 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
         RowVectorXd::Ones(num_artificial_vars);
 
     // Subtract rows with artificial variables from the auxiliary objective to make it a valid objective function
-    const auto artificial_rows = tableau.middleRows(problem.numLessThanConstraints(), num_artificial_vars);
+    const MatrixXd::BlockXpr artificial_rows =
+        tableau.middleRows(problem.numLessThanConstraints(), num_artificial_vars);
     RowVectorXd artificial_row_sum = RowVectorXd::Zero(tableau.cols());
     for (Index i = 0; i < artificial_rows.rows(); i++) {
       artificial_row_sum += artificial_rows.row(i);
@@ -204,7 +208,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
 
     // Perform simplex iterations to find initial BFS
     SolverProfiler aux_profiler{};
-    const auto aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
+    const SolverExitStatus aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
 
     if (config.verbose) {
       const auto total_time = aux_profiler.getAvgIterationTime() * aux_profiler.numIterations();
@@ -227,7 +231,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
       return SolverExitStatus::kInfeasible;
     }
 
-    auto objective_row = tableau.row(tableau.rows() - 1);
+    MatrixXd::RowXpr objective_row = tableau.row(tableau.rows() - 1);
     objective_row.head(problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
     for (Index i = 0; i < basic_vars.size(); i++) {
       objective_row -= tableau.row(i) * objective_row(basic_vars(i));
@@ -239,7 +243,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
 
   // Perform simplex iterations
   SolverProfiler profiler{};
-  const auto exit_status = solveTableau(tableau, basic_vars, profiler, config);
+  const SolverExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
 
   if (config.verbose) {
     const auto total_time = profiler.getAvgIterationTime() * profiler.numIterations();
@@ -252,7 +256,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   if (exit_status == SolverExitStatus::kSuccess) {
     // Extract solution and objective value
     solution = VectorXd::Zero(problem.numDecisionVars());
-    const VectorXd rhs = tableau.col(tableau.cols() - 1);
+    const MatrixXd::ColXpr rhs = tableau.col(tableau.cols() - 1);
     for (Index i = 0; i < basic_vars.size(); i++) {
       if (const Index var_index = basic_vars(i); var_index < problem.numDecisionVars()) {
         solution(var_index) = rhs(i);
