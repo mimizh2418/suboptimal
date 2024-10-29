@@ -23,10 +23,10 @@ include(FetchContent)
 
 find_package(Microsoft.GSL CONFIG)
 if(NOT Microsoft.GSL_FOUND)
-    message(STATUS "GSL not found, fetching from GitHub")
+    message(STATUS "Fetching GSL from https://github.com/microsoft/GSL.git")
     fetchcontent_declare(
         GSL
-        GIT_REPOSITORY "https://github.com/microsoft/GSL"
+        GIT_REPOSITORY "https://github.com/microsoft/GSL.git"
         GIT_TAG "v4.0.0"
         GIT_SHALLOW ON
     )
@@ -36,7 +36,7 @@ target_link_libraries(suboptimal PRIVATE Microsoft.GSL::GSL)
 
 find_package(Eigen3 3.4 CONFIG)
 if(NOT Eigen3_FOUND)
-    message(STATUS "Eigen3 not found, fetching from GitLab")
+    message(STATUS "Fetching Eigen3 from https://gitlab.com/libeigen/eigen.git")
     fetchcontent_declare(
         Eigen3
         GIT_REPOSITORY "https://gitlab.com/libeigen/eigen.git"
@@ -53,7 +53,7 @@ if(BUILD_TESTING)
 
     find_package(Catch2 3.7.0 CONFIG)
     if(NOT Catch2_FOUND)
-        message(STATUS "Catch2 not found, fetching from GitHub")
+        message(STATUS "Fetching Catch2 from https://github.com/catchorg/Catch2.git")
         fetchcontent_declare(
             Catch2
             GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
