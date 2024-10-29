@@ -1,4 +1,4 @@
-name: Build and test with sanitizers
+name: Sanitizers
 
 on: [ pull_request, push ]
 
@@ -36,7 +36,7 @@ jobs:
         run: cmake -B ${{github.workspace}}/build -S . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${{matrix.cmake-flags}}
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel $(nproc)
 
       - name: Test
         run: ctest --test-dir ${{github.workspace}}/build -C ${{env.BUILD_TYPE}} --output-on-failure
