@@ -8,6 +8,7 @@
 #include <stdexcept>
 
 #include <Eigen/Core>
+#include <gsl/util>
 
 #include "suboptimal/LinearProblem.h"
 #include "suboptimal/solvers/SolverExitStatus.h"
@@ -124,6 +125,8 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
 
   while (true) {
     profiler.startIteration();
+    auto end_profile_iter = gsl::finally([&] { profiler.endIteration(); });
+
     // Find pivot position
     Index pivot_row, pivot_col;
     const int pivot_status = findPivotPosition(tableau, basic_vars, config.pivot_rule, pivot_row, pivot_col);
@@ -143,10 +146,7 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
       exit_status = SolverExitStatus::kMaxIterationsExceeded;
       break;
     }
-
-    profiler.endIteration();
   }
-  profiler.endIteration();
 
   return exit_status;
 }
@@ -162,14 +162,15 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   }
 
   if (config.verbose) {
-    std::cout << "Solving linear problem: " << std::endl;
-    std::cout << "Maximize: " << problem.objectiveFunctionString() << std::endl;
-    std::cout << "Subject to: " << std::endl;
+    std::cout << "Solving linear problem \n"
+              << "Maximize: " << problem.objectiveFunctionString() << "\n"
+              << "Subject to: " << "\n";
     for (const auto constraint_strings = problem.constraintStrings();
          const auto& constraint_string : constraint_strings) {
-      std::cout << "  " << constraint_string << std::endl;
+      std::cout << "  " << constraint_string << "\n";
     }
-    std::cout << "Using pivot rule: " << toString(config.pivot_rule) << std::endl << std::endl;
+    std::cout << "Using pivot rule: " << toString(config.pivot_rule) << "\n";
+    std::cout << std::endl;
   }
 
   // Initialize tableau
@@ -209,25 +210,29 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
     // Perform simplex iterations to find initial BFS
     SolverProfiler aux_profiler{};
     const SolverExitStatus aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
+    const bool is_feasible = isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0);
 
-    if (config.verbose) {
-      const auto total_time = aux_profiler.getAvgIterationTime() * aux_profiler.numIterations();
-      std::cout << std::format("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)",
-                               total_time.count(), aux_profiler.numIterations(),
-                               aux_profiler.getAvgIterationTime().count())
-                << std::endl
-                << std::endl;
-    }
-
-    if (aux_exit == SolverExitStatus::kMaxIterationsExceeded) {
+    auto print_diagnostics = gsl::finally([&] {
       if (config.verbose) {
-        std::cout << "Max iterations exceeded while solving auxiliary LP" << std::endl;
+        const auto total_time = aux_profiler.getAvgIterationTime() * aux_profiler.numIterations();
+        std::cout << std::format("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)",
+                                 total_time.count(), aux_profiler.numIterations(),
+                                 aux_profiler.getAvgIterationTime().count())
+                  << "\n";
+        if (aux_exit != SolverExitStatus::kSuccess) {
+          std::cout << "Solving auxiliary LP failed: " << toString(aux_exit) << "\n";
+        } else if (!is_feasible) {
+          std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::kInfeasible) << "\n";
+        }
+        std::cout << std::endl;
       }
+    });
+
+    if (aux_exit != SolverExitStatus::kSuccess) {
       return aux_exit;
     }
-    if (aux_exit == SolverExitStatus::kUnbounded ||
-        !isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0)) {
-      std::cout << "The problem is infeasible" << std::endl;
+
+    if (!isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0)) {
       return SolverExitStatus::kInfeasible;
     }
 
@@ -245,13 +250,24 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   SolverProfiler profiler{};
   const SolverExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
 
-  if (config.verbose) {
+  auto print_diagnostics = gsl::finally([&] {
     const auto total_time = profiler.getAvgIterationTime() * profiler.numIterations();
-    std::cout << std::format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
-                             profiler.numIterations(), profiler.getAvgIterationTime().count())
-              << std::endl
-              << "Status: " << toString(exit_status) << std::endl;
-  }
+    if (config.verbose) {
+      std::cout << std::format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
+                               profiler.numIterations(), profiler.getAvgIterationTime().count())
+                << "\n";
+      if (exit_status != SolverExitStatus::kSuccess) {
+        std::cout << "Solver failed to find a solution: " << toString(exit_status) << "\n";
+      } else {
+        std::cout << "Solution:\n";
+        for (Index i = 0; i < problem.numDecisionVars(); i++) {
+          std::cout << "  x_" << i + 1 << " = " << solution(i) << "\n";
+        }
+        std::cout << "Objective value: " << objective_value << "\n";
+      }
+      std::cout << std::endl;
+    }
+  });
 
   if (exit_status == SolverExitStatus::kSuccess) {
     // Extract solution and objective value
@@ -263,18 +279,6 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
       }
     }
     objective_value = tableau(tableau.rows() - 1, tableau.cols() - 1);
-
-    if (config.verbose) {
-      std::cout << "Solution: " << std::endl;
-      for (Index i = 0; i < problem.numDecisionVars(); i++) {
-        std::cout << "  x_" << i + 1 << " = " << solution(i) << std::endl;
-      }
-      std::cout << "Objective value: " << objective_value << std::endl;
-    }
-  }
-
-  if (config.verbose) {
-    std::cout << std::endl;
   }
 
   return exit_status;

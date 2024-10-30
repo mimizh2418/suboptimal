@@ -53,7 +53,10 @@ if(BUILD_TESTING)
 
     find_package(Catch2 3.7.0 CONFIG)
     if(NOT Catch2_FOUND)
-        message(STATUS "Fetching Catch2 from https://github.com/catchorg/Catch2.git")
+        message(
+            STATUS
+            "Fetching Catch2 from https://github.com/catchorg/Catch2.git"
+        )
         fetchcontent_declare(
             Catch2
             GIT_REPOSITORY "https://github.com/catchorg/Catch2.git"
