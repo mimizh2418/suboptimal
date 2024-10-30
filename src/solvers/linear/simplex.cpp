@@ -213,19 +213,22 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
     const bool is_feasible = isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0);
 
     auto print_diagnostics = gsl::finally([&] {
-      if (config.verbose) {
-        const auto total_time = aux_profiler.getAvgIterationTime() * aux_profiler.numIterations();
-        std::cout << std::format("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)",
-                                 total_time.count(), aux_profiler.numIterations(),
-                                 aux_profiler.getAvgIterationTime().count())
-                  << "\n";
-        if (aux_exit != SolverExitStatus::kSuccess) {
-          std::cout << "Solving auxiliary LP failed: " << toString(aux_exit) << "\n";
-        } else if (!is_feasible) {
-          std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::kInfeasible) << "\n";
-        }
-        std::cout << std::endl;
+      if (!config.verbose) {
+        return;
       }
+
+      const auto total_time = aux_profiler.getAvgIterationTime() * aux_profiler.numIterations();
+      std::cout << std::format("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)",
+                               total_time.count(), aux_profiler.numIterations(),
+                               aux_profiler.getAvgIterationTime().count())
+                << "\n";
+
+      if (aux_exit != SolverExitStatus::kSuccess) {
+        std::cout << "Solving auxiliary LP failed: " << toString(aux_exit) << "\n";
+      } else if (!is_feasible) {
+        std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::kInfeasible) << "\n";
+      }
+      std::cout << std::endl;
     });
 
     if (aux_exit != SolverExitStatus::kSuccess) {
@@ -251,35 +254,40 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   const SolverExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
 
   auto print_diagnostics = gsl::finally([&] {
-    const auto total_time = profiler.getAvgIterationTime() * profiler.numIterations();
-    if (config.verbose) {
-      std::cout << std::format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
-                               profiler.numIterations(), profiler.getAvgIterationTime().count())
-                << "\n";
-      if (exit_status != SolverExitStatus::kSuccess) {
-        std::cout << "Solver failed to find a solution: " << toString(exit_status) << "\n";
-      } else {
-        std::cout << "Solution:\n";
-        for (Index i = 0; i < problem.numDecisionVars(); i++) {
-          std::cout << "  x_" << i + 1 << " = " << solution(i) << "\n";
-        }
-        std::cout << "Objective value: " << objective_value << "\n";
-      }
-      std::cout << std::endl;
+    if (!config.verbose) {
+      return;
     }
+
+    const auto total_time = profiler.getAvgIterationTime() * profiler.numIterations();
+    std::cout << std::format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
+                             profiler.numIterations(), profiler.getAvgIterationTime().count())
+              << "\n";
+
+    if (exit_status != SolverExitStatus::kSuccess) {
+      std::cout << "Solver failed to find a solution: " << toString(exit_status) << "\n" << std::endl;
+      return;
+    }
+
+    std::cout << "Solution:\n";
+    for (Index i = 0; i < problem.numDecisionVars(); i++) {
+      std::cout << "  x_" << i + 1 << " = " << solution(i) << "\n";
+    }
+    std::cout << "Objective value: " << objective_value << "\n" << std::endl;
   });
 
-  if (exit_status == SolverExitStatus::kSuccess) {
-    // Extract solution and objective value
-    solution = VectorXd::Zero(problem.numDecisionVars());
-    const MatrixXd::ColXpr rhs = tableau.col(tableau.cols() - 1);
-    for (Index i = 0; i < basic_vars.size(); i++) {
-      if (const Index var_index = basic_vars(i); var_index < problem.numDecisionVars()) {
-        solution(var_index) = rhs(i);
-      }
-    }
-    objective_value = tableau(tableau.rows() - 1, tableau.cols() - 1);
+  if (exit_status != SolverExitStatus::kSuccess) {
+    return exit_status;
   }
+
+  // Extract solution and objective value
+  solution = VectorXd::Zero(problem.numDecisionVars());
+  const MatrixXd::ColXpr rhs = tableau.col(tableau.cols() - 1);
+  for (Index i = 0; i < basic_vars.size(); i++) {
+    if (const Index var_index = basic_vars(i); var_index < problem.numDecisionVars()) {
+      solution(var_index) = rhs(i);
+    }
+  }
+  objective_value = tableau(tableau.rows() - 1, tableau.cols() - 1);
 
   return exit_status;
 }
