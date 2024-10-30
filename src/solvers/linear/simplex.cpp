@@ -217,10 +217,10 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
         return;
       }
 
-      const auto total_time = aux_profiler.getAvgIterationTime() * aux_profiler.numIterations();
+      const auto total_time = aux_profiler.totalSolveTime();
       std::cout << std::format("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)",
                                total_time.count(), aux_profiler.numIterations(),
-                               aux_profiler.getAvgIterationTime().count())
+                               aux_profiler.avgIterationTime().count())
                 << "\n";
 
       if (aux_exit != SolverExitStatus::kSuccess) {
@@ -258,9 +258,9 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
       return;
     }
 
-    const auto total_time = profiler.getAvgIterationTime() * profiler.numIterations();
+    const auto total_time = profiler.totalSolveTime();
     std::cout << std::format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
-                             profiler.numIterations(), profiler.getAvgIterationTime().count())
+                             profiler.numIterations(), profiler.avgIterationTime().count())
               << "\n";
 
     if (exit_status != SolverExitStatus::kSuccess) {
