@@ -3,7 +3,6 @@
 #pragma once
 
 #include <chrono>
-#include <gsl/assert>
 
 class SolverProfiler {
  public:
@@ -37,11 +36,11 @@ class SolverProfiler {
     return last_iteration_end_time - solve_start_time;
   }
 
-  std::chrono::duration<double, std::milli> avgIterationTime() const { 
+  std::chrono::duration<double, std::milli> avgIterationTime() const {
     if (!started) {
       return std::chrono::duration<double, std::milli>(0.0);
     }
-    return avg_iteration_time; 
+    return avg_iteration_time;
   }
 
   int numIterations() const { return solver_iterations; }

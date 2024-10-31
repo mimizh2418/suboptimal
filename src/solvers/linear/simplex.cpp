@@ -120,10 +120,12 @@ VectorX<Index> findBasicVars(const MatrixXd& tableau) {
 
 SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, SolverProfiler& profiler,
                               const SimplexSolverConfig& config) {
-  int num_iterations = 0;
-  auto exit_status = SolverExitStatus::kSuccess;
+  for (int i = 0; i < config.max_iterations; i++) {
+    // Check for timeout
+    if (profiler.totalSolveTime() >= config.timeout) {
+      return SolverExitStatus::kTimeout;
+    }
 
-  while (true) {
     profiler.startIteration();
     auto end_profile_iter = gsl::finally([&] { profiler.endIteration(); });
 
@@ -131,29 +133,20 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
     Index pivot_row, pivot_col;
     const int pivot_status = findPivotPosition(tableau, basic_vars, config.pivot_rule, pivot_row, pivot_col);
     if (pivot_status == -1) {
-      exit_status = SolverExitStatus::kUnbounded;  // Could not find a valid pivot position, problem is unbounded
-      break;
+      return SolverExitStatus::kUnbounded;  // Could not find a valid pivot position, problem is unbounded
     }
     if (pivot_status == 1) {
-      exit_status = SolverExitStatus::kSuccess;  // Optimal solution found
-      break;
+      return SolverExitStatus::kSuccess;  // Optimal solution found
     }
     // Perform pivot operation
     pivot(tableau, basic_vars, pivot_row, pivot_col);
-
-    // Check for maximum iterations
-    if (++num_iterations >= config.max_iterations) {
-      exit_status = SolverExitStatus::kMaxIterationsExceeded;
-      break;
-    }
   }
 
-  return exit_status;
+  return SolverExitStatus::kMaxIterationsExceeded;
 }
 
-namespace suboptimal {
-SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, double& objective_value,
-                              const SimplexSolverConfig& config) {
+SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, VectorXd& solution, double& objective_value,
+                                          const SimplexSolverConfig& config) {
   MatrixXd constraint_matrix;
   VectorXd constraint_rhs;
   problem.buildConstraints(constraint_matrix, constraint_rhs);
@@ -253,6 +246,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
   SolverProfiler profiler{};
   const SolverExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
 
+  // TODO why is this here
   auto print_diagnostics = gsl::finally([&] {
     if (!config.verbose) {
       return;
@@ -291,4 +285,3 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, VectorXd& solution, 
 
   return exit_status;
 }
-}  // namespace suboptimal

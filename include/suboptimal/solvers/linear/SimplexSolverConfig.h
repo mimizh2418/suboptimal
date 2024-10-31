@@ -14,7 +14,7 @@ struct SimplexSolverConfig {
   // Maximum number of iterations before solver gives up
   int max_iterations = 5000;
   // Maximum elapsed time before solver gives up
-  std::chrono::duration<double> timeout{std::numeric_limits<double>::infinity()};
+  std::chrono::duration<double, std::milli> timeout{std::numeric_limits<double>::infinity()};
   // Pivot rule to use
   SimplexPivotRule pivot_rule = SimplexPivotRule::kLexicographic;
 };
