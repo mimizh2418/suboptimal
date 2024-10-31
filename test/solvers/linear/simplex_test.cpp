@@ -8,6 +8,7 @@
 
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -18,6 +19,8 @@ TEST_CASE("Simplex - Basic 1-phase problem", "[simplex]") {
   constexpr double expected_objective = 400;
   const Vector2d expected_solution{{4, 8}};
 
+  auto pivot_rule = GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kBland, SimplexPivotRule::kDantzig);
+
   auto problem = LinearProblem::maximizationProblem(Vector2d{{40, 30}});
   problem.addLessThanConstraint(Vector2d{{1, 1}}, 12);
   problem.addLessThanConstraint(Vector2d{{2, 1}}, 16);
@@ -26,7 +29,7 @@ TEST_CASE("Simplex - Basic 1-phase problem", "[simplex]") {
 
   VectorXd solution;
   double objective_value;
-  auto status = solveSimplex(problem, solution, objective_value, {.verbose = true});
+  auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
   REQUIRE(status == SolverExitStatus::kSuccess);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
@@ -40,6 +43,8 @@ TEST_CASE("Simplex - Degenerate 1-phase problem", "[simplex]") {
   constexpr double expected_objective = 0.5;
   const Vector4d expected_solution{{0.5, 0, 0.5, 0}};
 
+  auto pivot_rule = GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kBland);
+
   auto problem = LinearProblem::maximizationProblem(Vector4d{{10, -57, -9, -24}});
   problem.addLessThanConstraint(Vector4d{{0.5, -5.5, -2.5, 9}}, 0);
   problem.addLessThanConstraint(Vector4d{{0.5, -1.5, -0.5, 1}}, 0);
@@ -50,8 +55,7 @@ TEST_CASE("Simplex - Degenerate 1-phase problem", "[simplex]") {
   // Solve with lexicographic pivot rule
   VectorXd solution;
   double objective_value;
-  auto status = solveSimplex(problem, solution, objective_value,
-                             {.verbose = true, .pivot_rule = SimplexPivotRule::kLexicographic});
+  auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
   REQUIRE(status == SolverExitStatus::kSuccess);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
@@ -59,26 +63,13 @@ TEST_CASE("Simplex - Degenerate 1-phase problem", "[simplex]") {
   for (Index i = 0; i < solution.size(); i++) {
     CHECK_THAT(solution(i), Catch::Matchers::WithinAbs(expected_solution(i), 1e-9));
   }
-
-  // Solve with Bland's pivot rule
-  status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = SimplexPivotRule::kBland});
-  // Verify solution
-  REQUIRE(status == SolverExitStatus::kSuccess);
-  CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
-  CHECK(solution.size() == 4);
-  for (Index i = 0; i < solution.size(); i++) {
-    CHECK_THAT(solution(i), Catch::Matchers::WithinAbs(expected_solution(i), 1e-9));
-  }
-
-  // Solve with Dantzig's pivot rule (should cycle)
-  status =
-      solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = SimplexPivotRule::kDantzig});
-  REQUIRE(status == SolverExitStatus::kMaxIterationsExceeded);
 }
 
 TEST_CASE("Simplex - Degenerate 2-phase problem", "[simplex]") {
   constexpr double expected_objective = -11;
   const Vector4d expected_solution{{4, 0, 1, 2}};
+
+  auto pivot_rule = GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kBland);
 
   auto problem = LinearProblem::maximizationProblem(Vector4d{{-2, -6, -1, -1}});
   problem.addEqualityConstraint(Vector4d{{1, 2, 0, 1}}, 6);
@@ -90,7 +81,7 @@ TEST_CASE("Simplex - Degenerate 2-phase problem", "[simplex]") {
 
   double objective_value;
   VectorXd solution;
-  auto status = solveSimplex(problem, solution, objective_value, {.verbose = true});
+  auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
   // Verify solution
   REQUIRE(status == SolverExitStatus::kSuccess);

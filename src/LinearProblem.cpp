@@ -20,9 +20,6 @@ LinearProblem::LinearProblem(const VectorXd& objective_coeffs)
   if (objective_coeffs.size() < 1) {
     throw std::invalid_argument("Objective function must have at least one coefficient");
   }
-  if ((objective_coeffs.array() == 0).any()) {
-    throw std::invalid_argument("Objective function coefficients must be non-zero");
-  }
 }
 
 LinearProblem LinearProblem::maximizationProblem(const VectorXd& objective_coeffs) {
