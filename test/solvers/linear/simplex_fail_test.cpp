@@ -24,7 +24,7 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
   REQUIRE(problem.numSlackVars() == 3);
   REQUIRE(problem.numArtificialVars() == 0);
 
-  VectorXd solution;
+  Vector4d solution;
   double objective_value;
 
   SECTION("Max iterations exceeded") {
@@ -54,7 +54,7 @@ TEST_CASE("Simplex falure mode - Unbounded problem", "[simplex]") {
   REQUIRE(problem.numSlackVars() == 3);
   REQUIRE(problem.numArtificialVars() == 0);
 
-  VectorXd solution;
+  Vector3d solution;
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
@@ -72,7 +72,7 @@ TEST_CASE("Simplex failure mode - Infeasible problem", "[simplex]") {
   REQUIRE(problem.numSlackVars() == 3);
   REQUIRE(problem.numArtificialVars() == 2);
 
-  VectorXd solution;
+  Vector3d solution;
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 

@@ -7,7 +7,8 @@
 
 #include <Eigen/Core>
 
-inline std::string expressionFromCoeffs(const Eigen::VectorXd& coeffs, const std::string& variable_name) {
+inline std::string expressionFromCoeffs(const Eigen::Ref<const Eigen::VectorXd>& coeffs,
+                                        const std::string& variable_name) {
   std::string ret;
   bool first = true;
   for (Eigen::Index i = 0; i < coeffs.size(); i++) {

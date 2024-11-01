@@ -28,7 +28,7 @@ TEST_CASE("Simplex - Basic 1-phase maximization problem", "[simplex]") {
   REQUIRE(problem.numSlackVars() == 2);
   REQUIRE(problem.numArtificialVars() == 0);
 
-  VectorXd solution;
+  Vector2d solution;
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
@@ -53,7 +53,7 @@ TEST_CASE("Simplex - Basic 1-phase minimization problem", "[simplex]") {
   REQUIRE(problem.numSlackVars() == 2);
   REQUIRE(problem.numArtificialVars() == 0);
 
-  VectorXd solution;
+  Vector3d solution;
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
@@ -78,7 +78,7 @@ TEST_CASE("Simplex - Degenerate 1-phase problem", "[simplex]") {
   REQUIRE(problem.numSlackVars() == 3);
   REQUIRE(problem.numArtificialVars() == 0);
 
-  VectorXd solution;
+  Vector4d solution;
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
@@ -103,7 +103,7 @@ TEST_CASE("Simplex - Basic 2-phase problem", "[simplex]") {
   REQUIRE(problem.numSlackVars() == 0);
   REQUIRE(problem.numArtificialVars() == 2);
 
-  VectorXd solution;
+  Vector3d solution;
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
@@ -130,7 +130,7 @@ TEST_CASE("Simplex - Degenerate 2-phase problem", "[simplex]") {
   REQUIRE(problem.numArtificialVars() == 4);
 
   double objective_value;
-  VectorXd solution;
+  Vector4d solution;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
   // Verify solution

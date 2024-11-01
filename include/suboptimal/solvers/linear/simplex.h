@@ -9,6 +9,6 @@
 #include "suboptimal/solvers/linear/SimplexSolverConfig.h"
 
 namespace suboptimal {
-SolverExitStatus solveSimplex(const LinearProblem& problem, Eigen::VectorXd& solution, double& objective_value,
+SolverExitStatus solveSimplex(const LinearProblem& problem, Eigen::Ref<Eigen::VectorXd> solution, double& objective_value,
                               const SimplexSolverConfig& config = SimplexSolverConfig());
 }  // namespace suboptimal

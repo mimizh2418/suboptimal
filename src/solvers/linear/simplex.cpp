@@ -144,7 +144,7 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
   return SolverExitStatus::kMaxIterationsExceeded;
 }
 
-SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, VectorXd& solution, double& objective_value,
+SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
                                           const SimplexSolverConfig& config) {
   MatrixXd constraint_matrix;
   VectorXd constraint_rhs;
