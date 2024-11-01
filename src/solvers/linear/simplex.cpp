@@ -150,9 +150,6 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, VectorXd
   MatrixXd constraint_matrix;
   VectorXd constraint_rhs;
   problem.buildConstraints(constraint_matrix, constraint_rhs);
-  if (problem.numConstraints() == 0) {
-    throw std::invalid_argument("Problem must have at least one constraint");
-  }
 
   if (config.verbose) {
     std::cout << "Solving linear problem \n"
@@ -164,6 +161,11 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, VectorXd
     }
     std::cout << "Using pivot rule: " << toString(config.pivot_rule) << "\n";
     std::cout << std::endl;
+  }
+
+  if (problem.numConstraints() == 0) {
+    std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::kUnbounded) << std::endl;
+    return SolverExitStatus::kUnbounded;
   }
 
   // Initialize tableau
