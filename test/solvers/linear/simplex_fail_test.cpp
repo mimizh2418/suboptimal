@@ -12,7 +12,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 using namespace Eigen;
 using namespace suboptimal;
@@ -45,7 +44,8 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
 }
 
 TEST_CASE("Simplex falure mode - Unbounded problem", "[simplex]") {
-  auto pivot_rule = GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kDantzig, SimplexPivotRule::kBland);
+  const auto pivot_rule =
+      GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kDantzig, SimplexPivotRule::kBland);
 
   auto problem = LinearProblem::maximizationProblem(Vector3d{{0, 2, 1}});
   problem.addLessThanConstraint(Vector3d{{1, -1, 1}}, 5);
@@ -62,7 +62,8 @@ TEST_CASE("Simplex falure mode - Unbounded problem", "[simplex]") {
 }
 
 TEST_CASE("Simplex failure mode - Infeasible problem", "[simplex]") {
-  auto pivot_rule = GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kDantzig, SimplexPivotRule::kBland);
+  const auto pivot_rule =
+      GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kDantzig, SimplexPivotRule::kBland);
 
   auto problem = LinearProblem::maximizationProblem(Vector3d{{1, -1, 1}});
   problem.addLessThanConstraint(Vector3d{{2, -1, -2}}, 4);

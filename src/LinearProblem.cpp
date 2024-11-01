@@ -15,7 +15,7 @@
 using namespace suboptimal;
 using namespace Eigen;
 
-LinearProblem::LinearProblem(const VectorXd& objective_coeffs, bool is_minimization)
+LinearProblem::LinearProblem(const VectorXd& objective_coeffs, const bool is_minimization)
     : is_minimization(is_minimization),
       objective_coeffs(is_minimization ? -objective_coeffs : objective_coeffs),
       num_decision_vars(objective_coeffs.size()) {

@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
-#include <stdexcept>
 
 #include <Eigen/Core>
 #include <gsl/util>
