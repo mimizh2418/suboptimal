@@ -156,7 +156,7 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, VectorXd
 
   if (config.verbose) {
     std::cout << "Solving linear problem \n"
-              << "Maximize: " << problem.objectiveFunctionString() << "\n"
+              << (problem.isMinimization() ? "Minimize: " : "Maximize: ") << problem.objectiveFunctionString() << "\n"
               << "Subject to: " << "\n";
     for (const auto constraint_strings = problem.constraintStrings();
          const auto& constraint_string : constraint_strings) {
@@ -281,7 +281,7 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, VectorXd
       solution(var_index) = rhs(i);
     }
   }
-  objective_value = tableau(tableau.rows() - 1, tableau.cols() - 1);
+  objective_value = (problem.isMinimization() ? -1 : 1) * tableau(tableau.rows() - 1, tableau.cols() - 1);
 
   return exit_status;
 }

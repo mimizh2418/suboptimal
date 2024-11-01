@@ -11,12 +11,15 @@ namespace suboptimal {
 class LinearProblem {
  public:
   static LinearProblem maximizationProblem(const Eigen::VectorXd& objective_coeffs);
+  static LinearProblem minimizationProblem(const Eigen::VectorXd& objective_coeffs);
 
   void addLessThanConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
   void addGreaterThanConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
   void addEqualityConstraint(const Eigen::VectorXd& constraint_coeffs, double rhs);
 
   const Eigen::VectorXd& getObjectiveCoeffs() const { return objective_coeffs; }
+
+  bool isMinimization() const { return is_minimization; }
 
   void buildConstraints(Eigen::MatrixXd& constraint_matrix, Eigen::VectorXd& constraint_rhs) const;
 
@@ -35,9 +38,11 @@ class LinearProblem {
   std::vector<std::string> constraintStrings() const;
 
  private:
-  explicit LinearProblem(const Eigen::VectorXd& objective_coeffs);
+  explicit LinearProblem(const Eigen::VectorXd& objective_coeffs, bool is_minimization);
 
   void addConstraintImpl(const Eigen::VectorXd& constraint_coeffs, double rhs, int constraint_type);
+
+  bool is_minimization;
 
   Eigen::VectorXd objective_coeffs;
 

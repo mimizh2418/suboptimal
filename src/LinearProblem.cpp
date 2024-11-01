@@ -15,15 +15,21 @@
 using namespace suboptimal;
 using namespace Eigen;
 
-LinearProblem::LinearProblem(const VectorXd& objective_coeffs)
-    : objective_coeffs(objective_coeffs), num_decision_vars(objective_coeffs.size()) {
+LinearProblem::LinearProblem(const VectorXd& objective_coeffs, bool is_minimization)
+    : is_minimization(is_minimization),
+      objective_coeffs(is_minimization ? -objective_coeffs : objective_coeffs),
+      num_decision_vars(objective_coeffs.size()) {
   if (objective_coeffs.size() < 1) {
     throw std::invalid_argument("Objective function must have at least one coefficient");
   }
 }
 
 LinearProblem LinearProblem::maximizationProblem(const VectorXd& objective_coeffs) {
-  return LinearProblem(objective_coeffs);
+  return LinearProblem(objective_coeffs, false);
+}
+
+LinearProblem LinearProblem::minimizationProblem(const VectorXd& objective_coeffs) {
+  return LinearProblem(objective_coeffs, true);
 }
 
 void LinearProblem::addLessThanConstraint(const VectorXd& constraint_coeffs, const double rhs) {
@@ -101,7 +107,7 @@ Index LinearProblem::numGreaterThanConstraints() const {
 }
 
 std::string LinearProblem::objectiveFunctionString() const {
-  return expressionFromCoeffs(objective_coeffs, "x");
+  return expressionFromCoeffs(is_minimization ? -objective_coeffs : objective_coeffs, "x");
 }
 
 std::vector<std::string> LinearProblem::constraintStrings() const {
