@@ -19,9 +19,7 @@ LinearProblem::LinearProblem(const Ref<const VectorXd>& objective_coeffs, const 
     : is_minimization(is_minimization),
       objective_coeffs((is_minimization ? -1 : 1) * objective_coeffs),
       num_decision_vars(objective_coeffs.size()) {
-  if (objective_coeffs.size() < 1) {
-    throw std::invalid_argument("Objective function must have at least one coefficient");
-  }
+  Expects(objective_coeffs.size() > 0);
 }
 
 LinearProblem LinearProblem::maximizationProblem(const Ref<const VectorXd>& objective_coeffs) {
@@ -45,9 +43,7 @@ void LinearProblem::addEqualityConstraint(const Ref<const VectorXd>& constraint_
 }
 
 void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coeffs, const double rhs, const int constraint_type) {
-  if (constraint_coeffs.size() != num_decision_vars) {
-    throw std::invalid_argument("Constraint coefficients must have same dimension as decision variables");
-  }
+  Expects(constraint_coeffs.size() == num_decision_vars);
 
   VectorXd new_constraint(constraint_coeffs.size() + 1);
   new_constraint.head(num_decision_vars) = constraint_coeffs;

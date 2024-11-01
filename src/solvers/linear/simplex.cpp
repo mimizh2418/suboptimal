@@ -146,6 +146,8 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
 
 SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
                                           const SimplexSolverConfig& config) {
+  Expects(solution.size() == problem.numDecisionVars());
+
   MatrixXd constraint_matrix;
   VectorXd constraint_rhs;
   problem.buildConstraints(constraint_matrix, constraint_rhs);

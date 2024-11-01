@@ -43,7 +43,7 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
   }
 }
 
-TEST_CASE("Simplex falure mode - Unbounded problem", "[simplex]") {
+TEST_CASE("Simplex failure mode - Unbounded problem", "[simplex]") {
   const auto pivot_rule =
       GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kDantzig, SimplexPivotRule::kBland);
 
