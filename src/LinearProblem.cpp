@@ -42,7 +42,8 @@ void LinearProblem::addEqualityConstraint(const Ref<const VectorXd>& constraint_
   addConstraintImpl(constraint_coeffs, rhs, 0);
 }
 
-void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coeffs, const double rhs, const int constraint_type) {
+void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coeffs, const double rhs,
+                                      const int constraint_type) {
   Expects(constraint_coeffs.size() == num_decision_vars);
 
   VectorXd new_constraint(constraint_coeffs.size() + 1);
