@@ -1,5 +1,7 @@
 // Copyright (c) 2024 Alvin Zhang.
 
+#define CATCH_CONFIG_FAST_COMPILE
+
 #include <suboptimal/LinearProblem.h>
 #include <suboptimal/solvers/SolverExitStatus.h>
 #include <suboptimal/solvers/linear/SimplexPivotRule.h>
