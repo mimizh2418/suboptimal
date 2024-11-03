@@ -3,7 +3,6 @@
 #include "suboptimal/LinearProblem.h"
 
 #include <format>
-#include <stdexcept>
 #include <string>
 #include <vector>
 
