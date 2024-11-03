@@ -21,7 +21,8 @@ class LinearProblem {
 
   bool isMinimization() const { return is_minimization; }
 
-  void buildConstraints(Eigen::MatrixXd& constraint_matrix, Eigen::VectorXd& constraint_rhs) const;
+  void buildConstraints(Eigen::Ref<Eigen::MatrixXd> constraint_matrix,
+                        Eigen::Ref<Eigen::VectorXd> constraint_rhs) const;
 
   bool hasInitialBFS() const { return equality_constraints.empty() && greater_than_constraints.empty(); }
 

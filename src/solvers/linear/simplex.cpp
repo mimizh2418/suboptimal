@@ -148,8 +148,9 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<Vect
                                           const SimplexSolverConfig& config) {
   Expects(solution.size() == problem.numDecisionVars());
 
-  MatrixXd constraint_matrix;
-  VectorXd constraint_rhs;
+  MatrixXd constraint_matrix(problem.numConstraints(),
+                             problem.numDecisionVars() + problem.numSlackVars() + problem.numArtificialVars());
+  VectorXd constraint_rhs(problem.numConstraints());
   problem.buildConstraints(constraint_matrix, constraint_rhs);
 
   if (config.verbose) {

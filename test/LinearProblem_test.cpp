@@ -24,8 +24,8 @@ TEST_CASE("LinearProblem - Problem initialization") {
                                           {1, 3, 0, -1, 0, 1}};  //
   const Vector3d expected_rhs{{50, 60, 15}};
 
-  MatrixXd mat;
-  VectorXd rhs;
+  Matrix<double, 3, 6> mat;
+  Vector3d rhs;
   problem.buildConstraints(mat, rhs);
 
   REQUIRE(mat.rows() == expected_mat.rows());

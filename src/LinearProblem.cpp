@@ -60,30 +60,32 @@ void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coef
   num_constraints++;
 }
 
-void LinearProblem::buildConstraints(MatrixXd& constraint_matrix, VectorXd& constraint_rhs) const {
-  const Index num_slack_vars = numLessThanConstraints() + numGreaterThanConstraints();
-  const Index num_artificial_vars = numEqualityConstraints() + numGreaterThanConstraints();
-  constraint_matrix = MatrixXd::Zero(num_constraints, num_decision_vars + num_slack_vars + num_artificial_vars);
+void LinearProblem::buildConstraints(Ref<MatrixXd> constraint_matrix, Ref<VectorXd> constraint_rhs) const {
+  Expects(constraint_matrix.rows() == num_constraints &&
+          constraint_matrix.cols() == num_decision_vars + numSlackVars() + numArtificialVars());
+  Expects(constraint_rhs.rows() == num_constraints);
+
+  constraint_matrix = MatrixXd::Zero(num_constraints, num_decision_vars + numSlackVars() + numArtificialVars());
   constraint_rhs = VectorXd::Zero(num_constraints);
 
   Index current_row_index = 0;
   Index slack_var_index = num_decision_vars;
-  Index artificial_var_index = num_decision_vars + num_slack_vars;
+  Index artificial_var_index = num_decision_vars + numSlackVars();
   for (size_t i = 0; i < less_than_constraints.size(); i++, current_row_index++, slack_var_index++) {
-    MatrixXd::RowXpr current_row = constraint_matrix.row(current_row_index);
+    Ref<MatrixXd>::RowXpr current_row = constraint_matrix.row(current_row_index);
     constraint_rhs(current_row_index) = less_than_constraints[i](num_decision_vars);
     current_row.head(num_decision_vars) = less_than_constraints[i].head(num_decision_vars);
     current_row(slack_var_index) = 1;
   }
   for (size_t i = 0; i < equality_constraints.size(); i++, current_row_index++, artificial_var_index++) {
-    MatrixXd::RowXpr current_row = constraint_matrix.row(current_row_index);
+    Ref<MatrixXd>::RowXpr current_row = constraint_matrix.row(current_row_index);
     constraint_rhs(current_row_index) = equality_constraints[i](num_decision_vars);
     current_row.head(num_decision_vars) = equality_constraints[i].head(num_decision_vars);
     current_row(artificial_var_index) = 1;
   }
   for (size_t i = 0; i < greater_than_constraints.size();
        i++, current_row_index++, slack_var_index++, artificial_var_index++) {
-    MatrixXd::RowXpr current_row = constraint_matrix.row(current_row_index);
+    Ref<MatrixXd>::RowXpr current_row = constraint_matrix.row(current_row_index);
     constraint_rhs(current_row_index) = greater_than_constraints[i](num_decision_vars);
     current_row.head(num_decision_vars) = greater_than_constraints[i].head(num_decision_vars);
     current_row(slack_var_index) = -1;
