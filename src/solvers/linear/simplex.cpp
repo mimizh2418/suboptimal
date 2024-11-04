@@ -26,21 +26,18 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
 
   // Entering variable selection
   // TODO: is there a less scuffed typedef for this?
-  const MatrixXd::ConstRowXpr::ConstSegmentReturnType objective_row =
-      tableau.row(tableau.rows() - 1).head(tableau.cols() - 1);
+  const Block objective_row = tableau.row(tableau.rows() - 1).head(tableau.cols() - 1);
   if (pivot_rule == SimplexPivotRule::kBland) {
     // Bland's rule: select the index of the first negative coefficient in the objective row
-    for (Index i = 0; i < objective_row.size(); i++) {
-      if (approxGEQ<double>(objective_row(i), 0)) {
-        continue;
-      }
-      pivot_col = i;
-      break;
+    const auto it = std::ranges::find_if(objective_row, [](const double coeff) { return approxLT<double>(coeff, 0); });
+    if (it != objective_row.end()) {
+      pivot_col = it - objective_row.begin();
     }
   } else if (pivot_rule == SimplexPivotRule::kLexicographic || pivot_rule == SimplexPivotRule::kDantzig) {
     // Dantzig's or lexicographic rule: select the index of the most negative coefficient in the objective row
     Index smallest_idx;
-    if (const double smallest_coeff = objective_row.minCoeff(&smallest_idx); approxLT<double>(smallest_coeff, 0)) {
+    const double smallest_coeff = objective_row.minCoeff(&smallest_idx);
+    if (approxLT<double>(smallest_coeff, 0)) {
       pivot_col = smallest_idx;
     }
   }
@@ -52,20 +49,25 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
 
   // Leaving variable selection
   double min_ratio = std::numeric_limits<double>::infinity();
-  const MatrixXd::ConstColXpr::ConstSegmentReturnType rhs_col =
-      tableau.col(tableau.cols() - 1).head(tableau.rows() - 1);
-  for (Index i = 0; i < rhs_col.size(); i++) {
-    const double ratio = rhs_col(i) / tableau(i, pivot_col);
+  const VectorXd ratios =
+      tableau(seqN(0, tableau.rows() - 1), last).cwiseQuotient(tableau(seqN(0, tableau.rows() - 1), pivot_col));
+  for (Index i = 0; i < ratios.size(); i++) {
+    double ratio = ratios(i);
     // Pivot element cannot be 0 and ratio cannot be negative
     if (approxLEQ<double>(tableau(i, pivot_col), 0) || approxLT<double>(ratio, 0)) {
       continue;
     }
-
     // Minimum ratio test
     if (approxLT<double>(ratio, min_ratio)) {
       min_ratio = ratio;
       pivot_row = i;
-    } else if (isApprox<double>(ratio, min_ratio) && pivot_rule == SimplexPivotRule::kLexicographic) {
+      continue;
+    }
+    // Dantzig does not have tie-breaking between equal ratios
+    if (!isApprox<double>(ratio, min_ratio) || pivot_rule == SimplexPivotRule::kDantzig) {
+      continue;
+    }
+    if (pivot_rule == SimplexPivotRule::kLexicographic) {
       // Lexicographic rule: select the variable with the lexicographically smallest row
       const RowVectorXd row_candidate = tableau.row(i) / tableau(i, pivot_col);
       const RowVectorXd current_best_row = tableau.row(pivot_row) / tableau(pivot_row, pivot_col);
@@ -73,7 +75,7 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
                                                [](const double a, const double b) { return approxLT<double>(a, b); })) {
         pivot_row = i;
       }
-    } else if (isApprox<double>(ratio, min_ratio) && pivot_rule == SimplexPivotRule::kBland) {
+    } else if (pivot_rule == SimplexPivotRule::kBland) {
       // Bland's rule: select the basic variable with the smallest index
       if (basic_vars(i) < basic_vars(pivot_row)) {
         pivot_row = i;
@@ -193,8 +195,8 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<Vect
     const MatrixXd::BlockXpr artificial_rows =
         tableau.middleRows(problem.numLessThanConstraints(), num_artificial_vars);
     RowVectorXd artificial_row_sum = RowVectorXd::Zero(tableau.cols());
-    for (Index i = 0; i < artificial_rows.rows(); i++) {
-      artificial_row_sum += artificial_rows.row(i);
+    for (auto row : artificial_rows.rowwise()) {
+      artificial_row_sum += row;
     }
     auxiliary_objective -= artificial_row_sum;
 
