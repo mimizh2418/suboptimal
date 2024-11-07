@@ -16,6 +16,8 @@
 #include "util/SolverProfiler.h"
 #include "util/comparison_util.h"
 
+#include <numeric>
+
 using namespace suboptimal;
 using namespace Eigen;
 
@@ -178,6 +180,7 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<Vect
   tableau.topRightCorner(problem.numConstraints(), 1) = constraint_rhs;
   tableau.bottomLeftCorner(1, problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
 
+  VectorX<Index> basic_vars;
   if (!problem.hasInitialBFS()) {
     if (config.verbose) {
       std::cout << "No trivial BFS found, solving auxiliary LP" << std::endl;
@@ -204,7 +207,7 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<Vect
     tableau.row(tableau.rows() - 1) = auxiliary_objective;
 
     // Find basic variables
-    VectorX<Index> basic_vars = findBasicVars(tableau);
+    basic_vars = findBasicVars(tableau);
 
     // Perform simplex iterations to find initial BFS
     SolverProfiler aux_profiler{};
@@ -238,15 +241,27 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<Vect
       return SolverExitStatus::kInfeasible;
     }
 
-    MatrixXd::RowXpr objective_row = tableau.row(tableau.rows() - 1);
+    // Remove non-basic artificial variables from tableau
+    std::vector<Index> cols_to_keep(problem.numDecisionVars() + problem.numSlackVars());
+    std::iota(cols_to_keep.begin(), cols_to_keep.end(), 0);
+    for (Index i = problem.numDecisionVars() + problem.numSlackVars(); i < tableau.cols() - 1; i++) {
+      if ((basic_vars.array() == i).any()) {
+        cols_to_keep.push_back(i);
+      }
+    }
+    cols_to_keep.push_back(tableau.cols() - 1); // Keep the RHS
+    tableau = tableau(all, cols_to_keep).eval();
+    basic_vars = findBasicVars(tableau); // Recalculate basic variables on new tableau
+
+    RowVectorXd objective_row = RowVectorXd::Zero(tableau.cols());
     objective_row.head(problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
     for (Index i = 0; i < basic_vars.size(); i++) {
       objective_row -= tableau.row(i) * objective_row(basic_vars(i));
     }
+    tableau.row(tableau.rows() - 1) = objective_row;
+  } else {
+    basic_vars = findBasicVars(tableau);
   }
-
-  // Initialize basic variables
-  VectorX<Index> basic_vars = findBasicVars(tableau);
 
   // Perform simplex iterations
   SolverProfiler profiler{};
