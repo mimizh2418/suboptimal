@@ -1,11 +1,14 @@
-#include "dynamics.h"
-#include "ElevatorMPC.h"
+// Copyright (c) 2024 Alvin Zhang.
+
+#include <suboptimal/solvers/SolverExitStatus.h>
 
 #include <chrono>
 #include <iostream>
 
 #include <Eigen/Core>
-#include <suboptimal/solvers/SolverExitStatus.h>
+
+#include "ElevatorMPC.h"
+#include "dynamics.h"
 
 int main() {
   using namespace std::chrono_literals;
@@ -18,7 +21,7 @@ int main() {
   constexpr double stall_current_A = 304.0;
   constexpr double free_current_A = 1.5;
   constexpr double free_speed_radPerS = 636.6961104;
-  const MotorConstants motor_constants{nominal_voltage, stall_torque_Nm, stall_current_A, free_speed_radPerS, 
+  const MotorConstants motor_constants{nominal_voltage, stall_torque_Nm, stall_current_A, free_speed_radPerS,
                                        free_current_A};
 
   // Elevator characteristics
@@ -29,12 +32,12 @@ int main() {
   constexpr double max_position_m = 1.0;
   const ElevatorDynamics elevator_dynamics{carriage_mass_kg, drum_radius_m, gearing, min_position_m, max_position_m, dt,
                                            motor_constants};
-  
+
   // MPC setup
   const Eigen::Vector2d weights{1.0, 0.1};
   constexpr int horizon = 15;
   const ElevatorMPC controller{elevator_dynamics, weights, horizon};
-  
+
   const Eigen::Vector2d reference{0.5, 0.0};
   Eigen::Vector2d state{0.0, 0.0};
 

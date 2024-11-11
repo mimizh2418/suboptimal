@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
+#include <numeric>
+#include <vector>
 
 #include <Eigen/Core>
 #include <gsl/util>
@@ -15,8 +17,6 @@
 #include "suboptimal/solvers/linear/SimplexSolverConfig.h"
 #include "util/SolverProfiler.h"
 #include "util/comparison_util.h"
-
-#include <numeric>
 
 using namespace suboptimal;
 using namespace Eigen;
@@ -54,7 +54,7 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
   const VectorXd ratios =
       tableau(seqN(0, tableau.rows() - 1), last).cwiseQuotient(tableau(seqN(0, tableau.rows() - 1), pivot_col));
   for (Index i = 0; i < ratios.size(); i++) {
-    double ratio = ratios(i);
+    const double ratio = ratios(i);
     // Pivot element cannot be 0 and ratio cannot be negative
     if (approxLEQ<double>(tableau(i, pivot_col), 0) || approxLT<double>(ratio, 0)) {
       continue;
@@ -77,7 +77,7 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
                                                [](const double a, const double b) { return approxLT<double>(a, b); })) {
         pivot_row = i;
       }
-    } else if (pivot_rule == SimplexPivotRule::kBland) {
+    } else {
       // Bland's rule: select the basic variable with the smallest index
       if (basic_vars(i) < basic_vars(pivot_row)) {
         pivot_row = i;
@@ -249,9 +249,9 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<Vect
         cols_to_keep.push_back(i);
       }
     }
-    cols_to_keep.push_back(tableau.cols() - 1); // Keep the RHS
+    cols_to_keep.push_back(tableau.cols() - 1);  // Keep the RHS
     tableau = tableau(all, cols_to_keep).eval();
-    basic_vars = findBasicVars(tableau); // Recalculate basic variables on new tableau
+    basic_vars = findBasicVars(tableau);  // Recalculate basic variables on new tableau
 
     RowVectorXd objective_row = RowVectorXd::Zero(tableau.cols());
     objective_row.head(problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();

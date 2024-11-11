@@ -85,7 +85,10 @@ if(BUILD_EXAMPLES)
             cmake_path(GET example FILENAME example_name)
             file(GLOB_RECURSE example_sources "${example}/*.cpp")
             add_executable(${example_name} ${example_sources})
-            target_compile_options(${example_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+            target_compile_options(
+                ${example_name}
+                PRIVATE -Wall -Wextra -Wpedantic -Werror
+            )
             target_include_directories(${example_name} PRIVATE "${example}")
             target_link_libraries(${example_name} PRIVATE suboptimal)
         endif()

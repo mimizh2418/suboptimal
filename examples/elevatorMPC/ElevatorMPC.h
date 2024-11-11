@@ -1,22 +1,25 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
-#include "dynamics.h"
+#include <suboptimal/LinearProblem.h>
+#include <suboptimal/solvers/linear/simplex.h>
 
 #include <tuple>
 
 #include <Eigen/Core>
-#include <suboptimal/LinearProblem.h>
-#include <suboptimal/solvers/linear/simplex.h>
+
+#include "dynamics.h"
 
 // https://math.mit.edu/classes/18.086/2014/reports/LeiZhou.pdf
 class ElevatorMPC {
  public:
   ElevatorMPC(const ElevatorDynamics& dynamics, const Eigen::Vector2d& weights, const int horizon)
       : N(horizon),
-        vars_per_ts(3 * num_states + num_inputs), // p+(k+1), v+(k+1), p-(k+1), v-(k+1), p(k+1), v(k+1), u'(k)
+        vars_per_ts(3 * num_states + num_inputs),  // p+(k+1), v+(k+1), p-(k+1), v-(k+1), p(k+1), v(k+1), u'(k)
         num_decision_vars(N * vars_per_ts),
         dynamics(dynamics),
-        weights(weights) {};
+        weights(weights) {}
 
   std::tuple<double, suboptimal::SolverExitStatus> calculate(const Eigen::Vector2d& state,
                                                              const Eigen::Vector2d& reference) const {

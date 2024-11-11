@@ -1,17 +1,15 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
 #include <chrono>
 #include <cmath>
 
 #include <Eigen/Core>
-#include <iostream>
 
 struct MotorConstants {
-  MotorConstants(const double nominal_voltage,
-                           const double stall_torque_Nm, 
-                           const double stall_current_A,
-                           const double free_speed_radPerS, 
-                           const double free_current_A)
+  MotorConstants(const double nominal_voltage, const double stall_torque_Nm, const double stall_current_A,
+                 const double free_speed_radPerS, const double free_current_A)
       : nominal_voltage(nominal_voltage),
         stall_torque_Nm(stall_torque_Nm),
         stall_current_A(stall_current_A),
@@ -32,12 +30,8 @@ struct MotorConstants {
 };
 
 struct ElevatorDynamics {
-  ElevatorDynamics(const double carriage_mass_kg, 
-                   const double drum_radius_m, 
-                   const double gearing,
-                   const double min_position_m, 
-                   const double max_position_m, 
-                   const std::chrono::duration<double> dt,
+  ElevatorDynamics(const double carriage_mass_kg, const double drum_radius_m, const double gearing,
+                   const double min_position_m, const double max_position_m, const std::chrono::duration<double> dt,
                    const MotorConstants& motor)
       : A{{0, 1},  //
           {0, (-std::pow(gearing, 2) * motor.kT_NmPerA) /
@@ -63,4 +57,3 @@ struct ElevatorDynamics {
   const double min_position_m;
   const double max_position_m;
 };
-
