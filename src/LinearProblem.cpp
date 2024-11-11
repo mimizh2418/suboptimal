@@ -9,6 +9,7 @@
 #include <Eigen/Core>
 #include <gsl/narrow>
 
+#include "util/comparison_util.h"
 #include "util/expression_util.h"
 
 using namespace suboptimal;
@@ -44,15 +45,24 @@ void LinearProblem::addEqualityConstraint(const Ref<const VectorXd>& constraint_
 void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coeffs, const double rhs,
                                       const int constraint_type) {
   Expects(constraint_coeffs.size() == num_decision_vars);
+  
+  VectorXd coeffs = constraint_coeffs;
+  double new_rhs = rhs;
+  int type = constraint_type;
+  if (approxLT<double>(rhs, 0)) {
+    coeffs = -constraint_coeffs;
+    new_rhs = -rhs;
+    type = -constraint_type;
+  }
 
-  VectorXd new_constraint(constraint_coeffs.size() + 1);
-  new_constraint.head(num_decision_vars) = constraint_coeffs;
-  new_constraint(num_decision_vars) = rhs;
-  if (constraint_type == 0) {
+  VectorXd new_constraint(coeffs.size() + 1);
+  new_constraint.head(num_decision_vars) = coeffs;
+  new_constraint(num_decision_vars) = new_rhs;
+  if (type == 0) {
     equality_constraints.push_back(new_constraint);
-  } else if (constraint_type < 0) {
+  } else if (type < 0) {
     less_than_constraints.push_back(new_constraint);
-  } else if (constraint_type > 0) {
+  } else if (type > 0) {
     greater_than_constraints.push_back(new_constraint);
   }
 

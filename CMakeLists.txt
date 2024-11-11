@@ -10,14 +10,16 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "" FORCE)
 endif()
 
-file(GLOB_RECURSE SOURCES "${CMAKE_HOME_DIRECTORY}/src/*.cpp")
+option(BUILD_EXAMPLES "Build examples" ON)
+
+file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_library(suboptimal ${SOURCES})
 
 target_include_directories(
     suboptimal
-    PUBLIC "${CMAKE_SOURCE_DIR}/include"
-    PRIVATE "${CMAKE_SOURCE_DIR}/src"
+    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src"
 )
 
 target_compile_options(suboptimal PRIVATE -Wall -Wextra -Wpedantic -Werror)
@@ -51,7 +53,7 @@ endif()
 target_link_libraries(suboptimal PUBLIC Eigen3::Eigen)
 
 if(BUILD_TESTING)
-    file(GLOB_RECURSE TEST_SOURCES "${CMAKE_SOURCE_DIR}/test/*.cpp")
+    file(GLOB_RECURSE TEST_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/test/*.cpp")
     add_executable(tests ${TEST_SOURCES})
     target_compile_options(tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
 
@@ -73,4 +75,19 @@ if(BUILD_TESTING)
 
     include(Catch)
     catch_discover_tests(tests)
+endif()
+
+if(BUILD_EXAMPLES)
+    file(GLOB example_subdirs "${CMAKE_CURRENT_SOURCE_DIR}/examples/*")
+    foreach(example ${example_subdirs})
+        message(${example})
+        if(IS_DIRECTORY ${example})
+            cmake_path(GET example FILENAME example_name)
+            file(GLOB_RECURSE example_sources "${example}/*.cpp")
+            add_executable(${example_name} ${example_sources})
+            target_compile_options(${example_name} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+            target_include_directories(${example_name} PRIVATE "${example}")
+            target_link_libraries(${example_name} PRIVATE suboptimal)
+        endif()
+    endforeach()
 endif()
