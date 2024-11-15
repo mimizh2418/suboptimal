@@ -12,7 +12,7 @@ endif()
 
 option(BUILD_EXAMPLES "Build examples" ON)
 
-file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_library(suboptimal ${SOURCES})
 
