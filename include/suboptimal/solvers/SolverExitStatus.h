@@ -19,16 +19,17 @@ enum class SolverExitStatus {
 };
 
 constexpr std::string toString(const SolverExitStatus& status) {
+  using enum SolverExitStatus;
   switch (status) {
-    case SolverExitStatus::kSuccess:
+    case kSuccess:
       return "solver found an optimal solution";
-    case SolverExitStatus::kInfeasible:
+    case kInfeasible:
       return "problem is infeasible";
-    case SolverExitStatus::kUnbounded:
+    case kUnbounded:
       return "problem is unbounded";
-    case SolverExitStatus::kMaxIterationsExceeded:
+    case kMaxIterationsExceeded:
       return "solver exceeded the maximum number of iterations";
-    case SolverExitStatus::kTimeout:
+    case kTimeout:
       return "solver exceeded the maximum elapsed time";
     default:
       return "unknown status";

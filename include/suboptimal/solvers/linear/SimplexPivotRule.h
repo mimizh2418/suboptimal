@@ -15,12 +15,13 @@ enum class SimplexPivotRule {
 };
 
 constexpr std::string toString(const SimplexPivotRule& rule) {
+  using enum SimplexPivotRule;
   switch (rule) {
-    case SimplexPivotRule::kDantzig:
+    case kDantzig:
       return "Dantzig";
-    case SimplexPivotRule::kBland:
+    case kBland:
       return "Bland";
-    case SimplexPivotRule::kLexicographic:
+    case kLexicographic:
       return "Lexicographic";
     default:
       return "unknown pivot rule";
