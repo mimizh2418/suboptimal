@@ -16,6 +16,6 @@ struct SimplexSolverConfig {
   // Maximum elapsed time before solver gives up
   std::chrono::duration<double, std::milli> timeout{std::numeric_limits<double>::infinity()};
   // Pivot rule to use
-  SimplexPivotRule pivot_rule = SimplexPivotRule::kLexicographic;
+  SimplexPivotRule pivot_rule = SimplexPivotRule::Lexicographic;
 };
 }  // namespace suboptimal

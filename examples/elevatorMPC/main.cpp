@@ -43,7 +43,7 @@ int main() {
 
   while (!((state - reference).cwiseAbs().array() < 1e-2).all()) {
     auto [voltage, status] = controller.calculate(state, reference);
-    if (status != suboptimal::SolverExitStatus::kSuccess) {
+    if (status != suboptimal::SolverExitStatus::Success) {
       std::cout << "Solver failed with status: " << suboptimal::toString(status) << std::endl;
       break;
     }

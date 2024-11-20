@@ -7,21 +7,21 @@
 namespace suboptimal {
 enum class SimplexPivotRule {
   // Simplest pivot rule, practical in some cases but may cause cycling
-  kDantzig,
+  Dantzig,
   // Prevents cycling, but may take longer to converge
-  kBland,
+  Bland,
   // Prevents cycling and is more efficient than Bland's rule
-  kLexicographic
+  Lexicographic
 };
 
 constexpr std::string toString(const SimplexPivotRule& rule) {
   using enum SimplexPivotRule;
   switch (rule) {
-    case kDantzig:
+    case Dantzig:
       return "Dantzig";
-    case kBland:
+    case Bland:
       return "Bland";
-    case kLexicographic:
+    case Lexicographic:
       return "Lexicographic";
     default:
       return "unknown pivot rule";

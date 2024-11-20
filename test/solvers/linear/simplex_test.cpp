@@ -22,7 +22,7 @@ TEST_CASE("Simplex - Basic 1-phase maximization problem", "[simplex]") {
   const Vector2d expected_solution{{4, 8}};
 
   const auto pivot_rule =
-      GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kBland, SimplexPivotRule::kDantzig);
+      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
   auto problem = LinearProblem::maximizationProblem(Vector2d{{40, 30}});
   problem.addLessThanConstraint(Vector2d{{1, 1}}, 12);
@@ -34,7 +34,7 @@ TEST_CASE("Simplex - Basic 1-phase maximization problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
-  REQUIRE(status == SolverExitStatus::kSuccess);
+  REQUIRE(status == SolverExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
@@ -47,7 +47,7 @@ TEST_CASE("Simplex - Basic 1-phase minimization problem", "[simplex]") {
   const Vector3d expected_solution{{0, 0, 5}};
 
   const auto pivot_rule =
-      GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kBland, SimplexPivotRule::kDantzig);
+      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
   auto problem = LinearProblem::minimizationProblem(Vector3d{{-2, -3, -4}});
   problem.addLessThanConstraint(Vector3d{{3, 2, 1}}, 10);
@@ -59,7 +59,7 @@ TEST_CASE("Simplex - Basic 1-phase minimization problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
-  REQUIRE(status == SolverExitStatus::kSuccess);
+  REQUIRE(status == SolverExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
@@ -71,7 +71,7 @@ TEST_CASE("Simplex - Degenerate 1-phase problem", "[simplex]") {
   constexpr double expected_objective = 0.5;
   const Vector4d expected_solution{{0.5, 0, 0.5, 0}};
 
-  const auto pivot_rule = GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kBland);
+  const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland);
 
   auto problem = LinearProblem::maximizationProblem(Vector4d{{10, -57, -9, -24}});
   problem.addLessThanConstraint(Vector4d{{0.5, -5.5, -2.5, 9}}, 0);
@@ -84,7 +84,7 @@ TEST_CASE("Simplex - Degenerate 1-phase problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
-  REQUIRE(status == SolverExitStatus::kSuccess);
+  REQUIRE(status == SolverExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
@@ -97,7 +97,7 @@ TEST_CASE("Simplex - Basic 2-phase problem", "[simplex]") {
   const Vector3d expected_solution{{15.0 / 7.0, 0.0, 25.0 / 7.0}};
 
   const auto pivot_rule =
-      GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kBland, SimplexPivotRule::kDantzig);
+      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
   auto problem = LinearProblem::minimizationProblem(Vector3d{{-2, -3, -4}});
   problem.addEqualityConstraint(Vector3d{{3, 2, 1}}, 10);
@@ -109,7 +109,7 @@ TEST_CASE("Simplex - Basic 2-phase problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
-  REQUIRE(status == SolverExitStatus::kSuccess);
+  REQUIRE(status == SolverExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
@@ -121,7 +121,7 @@ TEST_CASE("Simplex - Degenerate 2-phase problem", "[simplex]") {
   constexpr double expected_objective = 11;
   const Vector4d expected_solution{{4, 0, 1, 2}};
 
-  const auto pivot_rule = GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kBland);
+  const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland);
 
   auto problem = LinearProblem::minimizationProblem(Vector4d{{2, 6, 1, 1}});
   problem.addEqualityConstraint(Vector4d{{1, 2, 0, 1}}, 6);
@@ -136,7 +136,7 @@ TEST_CASE("Simplex - Degenerate 2-phase problem", "[simplex]") {
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
   // Verify solution
-  REQUIRE(status == SolverExitStatus::kSuccess);
+  REQUIRE(status == SolverExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {

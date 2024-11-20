@@ -29,13 +29,13 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
   // Entering variable selection
   // TODO: is there a less scuffed typedef for this?
   const Block objective_row = tableau.row(tableau.rows() - 1).head(tableau.cols() - 1);
-  if (pivot_rule == SimplexPivotRule::kBland) {
+  if (pivot_rule == SimplexPivotRule::Bland) {
     // Bland's rule: select the index of the first negative coefficient in the objective row
     const auto it = std::ranges::find_if(objective_row, [](const double coeff) { return approxLT<double>(coeff, 0); });
     if (it != objective_row.end()) {
       pivot_col = it - objective_row.begin();
     }
-  } else if (pivot_rule == SimplexPivotRule::kLexicographic || pivot_rule == SimplexPivotRule::kDantzig) {
+  } else if (pivot_rule == SimplexPivotRule::Lexicographic || pivot_rule == SimplexPivotRule::Dantzig) {
     // Dantzig's or lexicographic rule: select the index of the most negative coefficient in the objective row
     Index smallest_idx;
     const double smallest_coeff = objective_row.minCoeff(&smallest_idx);
@@ -66,10 +66,10 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
       continue;
     }
     // Dantzig does not have tie-breaking between equal ratios
-    if (!isApprox<double>(ratio, min_ratio) || pivot_rule == SimplexPivotRule::kDantzig) {
+    if (!isApprox<double>(ratio, min_ratio) || pivot_rule == SimplexPivotRule::Dantzig) {
       continue;
     }
-    if (pivot_rule == SimplexPivotRule::kLexicographic) {
+    if (pivot_rule == SimplexPivotRule::Lexicographic) {
       // Lexicographic rule: select the variable with the lexicographically smallest row
       const RowVectorXd row_candidate = tableau.row(i) / tableau(i, pivot_col);
       const RowVectorXd current_best_row = tableau.row(pivot_row) / tableau(pivot_row, pivot_col);
@@ -126,7 +126,7 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
   for (int i = 0; i < config.max_iterations; i++) {
     // Check for timeout
     if (profiler.totalSolveTime() >= config.timeout) {
-      return SolverExitStatus::kTimeout;
+      return SolverExitStatus::Timeout;
     }
 
     profiler.startIteration();
@@ -136,16 +136,16 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
     Index pivot_row, pivot_col;
     const int pivot_status = findPivotPosition(tableau, basic_vars, config.pivot_rule, pivot_row, pivot_col);
     if (pivot_status == -1) {
-      return SolverExitStatus::kUnbounded;  // Could not find a valid pivot position, problem is unbounded
+      return SolverExitStatus::Unbounded;  // Could not find a valid pivot position, problem is unbounded
     }
     if (pivot_status == 1) {
-      return SolverExitStatus::kSuccess;  // Optimal solution found
+      return SolverExitStatus::Success;  // Optimal solution found
     }
     // Perform pivot operation
     pivot(tableau, basic_vars, pivot_row, pivot_col);
   }
 
-  return SolverExitStatus::kMaxIterationsExceeded;
+  return SolverExitStatus::MaxIterationsExceeded;
 }
 
 SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
@@ -170,8 +170,8 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
   }
 
   if (problem.numConstraints() == 0) {
-    std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::kUnbounded) << std::endl;
-    return SolverExitStatus::kUnbounded;
+    std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::Unbounded) << std::endl;
+    return SolverExitStatus::Unbounded;
   }
 
   // Initialize tableau
@@ -225,20 +225,20 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
                                aux_profiler.avgIterationTime().count())
                 << "\n";
 
-      if (aux_exit != SolverExitStatus::kSuccess) {
+      if (aux_exit != SolverExitStatus::Success) {
         std::cout << "Solving auxiliary LP failed: " << toString(aux_exit) << "\n";
       } else if (!is_feasible) {
-        std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::kInfeasible) << "\n";
+        std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::Infeasible) << "\n";
       }
       std::cout << std::endl;
     });
 
-    if (aux_exit != SolverExitStatus::kSuccess) {
+    if (aux_exit != SolverExitStatus::Success) {
       return aux_exit;
     }
 
     if (!isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0)) {
-      return SolverExitStatus::kInfeasible;
+      return SolverExitStatus::Infeasible;
     }
 
     // Remove non-basic artificial variables from tableau
@@ -278,7 +278,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
                              profiler.numIterations(), profiler.avgIterationTime().count())
               << "\n";
 
-    if (exit_status != SolverExitStatus::kSuccess) {
+    if (exit_status != SolverExitStatus::Success) {
       std::cout << "Solver failed to find a solution: " << toString(exit_status) << "\n" << std::endl;
       return;
     }
@@ -290,7 +290,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     std::cout << "Objective value: " << objective_value << "\n" << std::endl;
   });
 
-  if (exit_status != SolverExitStatus::kSuccess) {
+  if (exit_status != SolverExitStatus::Success) {
     return exit_status;
   }
 

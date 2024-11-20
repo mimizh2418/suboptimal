@@ -7,29 +7,29 @@
 namespace suboptimal {
 enum class SolverExitStatus {
   // The solver found an optimal solution
-  kSuccess,
+  Success,
   // The solver determined the problem to be infeasible and stopped
-  kInfeasible,
+  Infeasible,
   // The solver determined the problem to be unbounded and stopped
-  kUnbounded,
+  Unbounded,
   // The solver exceeded the maximum number of iterations without finding a solution
-  kMaxIterationsExceeded,
+  MaxIterationsExceeded,
   // The solver exceeded the maximum elapsed time without finding a solution
-  kTimeout
+  Timeout
 };
 
 constexpr std::string toString(const SolverExitStatus& status) {
   using enum SolverExitStatus;
   switch (status) {
-    case kSuccess:
+    case Success:
       return "solver found an optimal solution";
-    case kInfeasible:
+    case Infeasible:
       return "problem is infeasible";
-    case kUnbounded:
+    case Unbounded:
       return "problem is unbounded";
-    case kMaxIterationsExceeded:
+    case MaxIterationsExceeded:
       return "solver exceeded the maximum number of iterations";
-    case kTimeout:
+    case Timeout:
       return "solver exceeded the maximum elapsed time";
     default:
       return "unknown status";

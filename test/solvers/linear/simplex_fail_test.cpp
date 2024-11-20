@@ -31,8 +31,8 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
 
   SECTION("Max iterations exceeded") {
     auto status =
-        solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = SimplexPivotRule::kDantzig});
-    REQUIRE(status == SolverExitStatus::kMaxIterationsExceeded);
+        solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = SimplexPivotRule::Dantzig});
+    REQUIRE(status == SolverExitStatus::MaxIterationsExceeded);
   }
 
   SECTION("Timeout") {
@@ -40,14 +40,14 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
                                {.verbose = true,
                                 .max_iterations = std::numeric_limits<int>::max(),
                                 .timeout = std::chrono::duration<double, std::milli>{100},
-                                .pivot_rule = SimplexPivotRule::kDantzig});
-    REQUIRE(status == SolverExitStatus::kTimeout);
+                                .pivot_rule = SimplexPivotRule::Dantzig});
+    REQUIRE(status == SolverExitStatus::Timeout);
   }
 }
 
 TEST_CASE("Simplex failure mode - Unbounded problem", "[simplex]") {
   const auto pivot_rule =
-      GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kDantzig, SimplexPivotRule::kBland);
+      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Dantzig, SimplexPivotRule::Bland);
 
   auto problem = LinearProblem::maximizationProblem(Vector3d{{0, 2, 1}});
   problem.addLessThanConstraint(Vector3d{{1, -1, 1}}, 5);
@@ -60,12 +60,12 @@ TEST_CASE("Simplex failure mode - Unbounded problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
-  REQUIRE(status == SolverExitStatus::kUnbounded);
+  REQUIRE(status == SolverExitStatus::Unbounded);
 }
 
 TEST_CASE("Simplex failure mode - Infeasible problem", "[simplex]") {
   const auto pivot_rule =
-      GENERATE(SimplexPivotRule::kLexicographic, SimplexPivotRule::kDantzig, SimplexPivotRule::kBland);
+      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Dantzig, SimplexPivotRule::Bland);
 
   auto problem = LinearProblem::maximizationProblem(Vector3d{{1, -1, 1}});
   problem.addLessThanConstraint(Vector3d{{2, -1, -2}}, 4);
@@ -78,5 +78,5 @@ TEST_CASE("Simplex failure mode - Infeasible problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
-  REQUIRE(status == SolverExitStatus::kInfeasible);
+  REQUIRE(status == SolverExitStatus::Infeasible);
 }
