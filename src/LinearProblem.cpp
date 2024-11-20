@@ -12,9 +12,9 @@
 #include "util/comparison_util.h"
 #include "util/expression_util.h"
 
-using namespace suboptimal;
 using namespace Eigen;
 
+namespace suboptimal {
 LinearProblem::LinearProblem(const Ref<const VectorXd>& objective_coeffs, const bool is_minimization)
     : is_minimization(is_minimization),
       objective_coeffs((is_minimization ? -1 : 1) * objective_coeffs),
@@ -136,3 +136,4 @@ std::vector<std::string> LinearProblem::constraintStrings() const {
   }
   return ret;
 }
+}  // namespace suboptimal

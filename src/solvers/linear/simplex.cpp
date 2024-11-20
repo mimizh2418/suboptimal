@@ -18,9 +18,9 @@
 #include "util/SolverProfiler.h"
 #include "util/comparison_util.h"
 
-using namespace suboptimal;
 using namespace Eigen;
 
+namespace suboptimal {
 int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars, const SimplexPivotRule pivot_rule,
                       Index& pivot_row, Index& pivot_col) {
   pivot_col = -1;
@@ -148,8 +148,8 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
   return SolverExitStatus::kMaxIterationsExceeded;
 }
 
-SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
-                                          const SimplexSolverConfig& config) {
+SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
+                              const SimplexSolverConfig& config) {
   Expects(solution.size() == problem.numDecisionVars());
 
   MatrixXd constraint_matrix(problem.numConstraints(),
@@ -306,3 +306,4 @@ SolverExitStatus suboptimal::solveSimplex(const LinearProblem& problem, Ref<Vect
 
   return exit_status;
 }
+}  // namespace suboptimal
