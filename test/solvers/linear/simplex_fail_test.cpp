@@ -46,8 +46,7 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
 }
 
 TEST_CASE("Simplex failure mode - Unbounded problem", "[simplex]") {
-  const auto pivot_rule =
-      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Dantzig, SimplexPivotRule::Bland);
+  const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Dantzig, SimplexPivotRule::Bland);
 
   auto problem = LinearProblem::maximizationProblem(Vector3d{{0, 2, 1}});
   problem.addLessThanConstraint(Vector3d{{1, -1, 1}}, 5);
@@ -64,8 +63,7 @@ TEST_CASE("Simplex failure mode - Unbounded problem", "[simplex]") {
 }
 
 TEST_CASE("Simplex failure mode - Infeasible problem", "[simplex]") {
-  const auto pivot_rule =
-      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Dantzig, SimplexPivotRule::Bland);
+  const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Dantzig, SimplexPivotRule::Bland);
 
   auto problem = LinearProblem::maximizationProblem(Vector3d{{1, -1, 1}});
   problem.addLessThanConstraint(Vector3d{{2, -1, -2}}, 4);

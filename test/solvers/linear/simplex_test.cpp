@@ -21,8 +21,7 @@ TEST_CASE("Simplex - Basic 1-phase maximization problem", "[simplex]") {
   constexpr double expected_objective = 400;
   const Vector2d expected_solution{{4, 8}};
 
-  const auto pivot_rule =
-      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
+  const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
   auto problem = LinearProblem::maximizationProblem(Vector2d{{40, 30}});
   problem.addLessThanConstraint(Vector2d{{1, 1}}, 12);
@@ -46,8 +45,7 @@ TEST_CASE("Simplex - Basic 1-phase minimization problem", "[simplex]") {
   constexpr double expected_objective = -20;
   const Vector3d expected_solution{{0, 0, 5}};
 
-  const auto pivot_rule =
-      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
+  const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
   auto problem = LinearProblem::minimizationProblem(Vector3d{{-2, -3, -4}});
   problem.addLessThanConstraint(Vector3d{{3, 2, 1}}, 10);
@@ -96,8 +94,7 @@ TEST_CASE("Simplex - Basic 2-phase problem", "[simplex]") {
   constexpr double expected_objective = -130.0 / 7.0;
   const Vector3d expected_solution{{15.0 / 7.0, 0.0, 25.0 / 7.0}};
 
-  const auto pivot_rule =
-      GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
+  const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
   auto problem = LinearProblem::minimizationProblem(Vector3d{{-2, -3, -4}});
   problem.addEqualityConstraint(Vector3d{{3, 2, 1}}, 10);
