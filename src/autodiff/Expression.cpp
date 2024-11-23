@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <ranges>
+#include <vector>
 
 namespace suboptimal {
 Expression::Expression(const double value, const ExpressionType type) : value{value}, type{type} {}
@@ -13,6 +15,7 @@ Expression::Expression(const ExpressionType type, const ValueFunc valueFunc, con
                        const AdjointExprFunc adjointExprFunc, const ExpressionPtr arg)  // NOLINT
     : value{valueFunc(arg->value, 0.0)},
       lhs{arg},
+      valueFunc{valueFunc},
       lhsAdjointValueFunc{adjointValueFunc},
       lhsAdjointExprFunc{adjointExprFunc},
       type{type} {}
@@ -24,11 +27,55 @@ Expression::Expression(const ExpressionType type, const ValueFunc valueFunc, con
     : value{valueFunc(lhs->value, rhs->value)},
       lhs{lhs},
       rhs{rhs},
+      valueFunc{valueFunc},
       lhsAdjointValueFunc{lhsAdjointValueFunc},
       rhsAdjointValueFunc{rhsAdjointValueFunc},
       lhsAdjointExprFunc{lhsAdjointExprFunc},
       rhsAdjointExprFunc{rhsAdjointExprFunc},
       type{type} {}
+
+void Expression::update() {
+  if (isIndependent()) {
+    // Expression represents either a constant or an independent variable, so no update is needed
+    return;
+  }
+
+  std::vector<Expression*> exprs{};
+  std::vector<Expression*> stack{};
+
+  if (lhs != nullptr) {
+    stack.push_back(lhs.get());
+  }
+  if (rhs != nullptr) {
+    stack.push_back(rhs.get());
+  }
+  while (!stack.empty()) {
+    const auto expr = stack.back();
+    stack.pop_back();
+    exprs.push_back(expr);
+
+    // Don't need to update the values of independent variables
+    if (expr->isIndependent()) {
+      continue;
+    }
+
+    if (expr->lhs != nullptr) {
+      stack.push_back(expr->lhs.get());
+    }
+    if (expr->rhs != nullptr) {
+      stack.push_back(expr->rhs.get());
+    }
+  }
+
+  for (const auto expr : std::ranges::reverse_view(exprs)) {
+    if (expr->isUnary()) {
+      expr->value = expr->valueFunc(expr->lhs->value, 0.0);
+    } else if (expr->isBinary()) {
+      expr->value = expr->valueFunc(expr->lhs->value, expr->rhs->value);
+    }
+  }
+  value = valueFunc(lhs->value, rhs->value);
+}
 
 // operator overloading boilerplate :skull:
 // TODO operator null checks
@@ -125,6 +172,10 @@ ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
         return lhs_expr * parent_adjoint;
       },
       lhs, rhs);
+}
+
+ExpressionPtr func(const ExpressionPtr& x) {
+  return x;
 }
 
 ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {

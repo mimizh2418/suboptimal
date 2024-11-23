@@ -23,7 +23,7 @@ struct Expression {
 
   double value = 0.0;
   double adjoint = 0.0;
-  ExpressionPtr adjointExpr;
+  ExpressionPtr adjointExpr = nullptr;
 
   ExpressionPtr lhs = nullptr;
   ExpressionPtr rhs = nullptr;
@@ -56,9 +56,39 @@ struct Expression {
              AdjointValueFunc rhsAdjointValueFunc, AdjointExprFunc lhsAdjointExprFunc,
              AdjointExprFunc rhsAdjointExprFunc, ExpressionPtr lhs, ExpressionPtr rhs);
 
-  bool isConstant() const { return type == ExpressionType::Constant; }
+  /**
+   * Checks if the value of this expression is independent of any other expressions
+   */
+  bool isIndependent() const { return lhs == nullptr && rhs == nullptr; }
+
+  /**
+   * Checks if the value of this expression is constant
+   */
+  bool isConstant() const { return isIndependent() && type == ExpressionType::Constant; }
+
+  /**
+   * Checks if the expression represents a unary operation
+   */
+  bool isUnary() const { return !isIndependent() && rhs == nullptr; }
+
+  /**
+   * Checks if the expression represents a binary operation
+   */
+  bool isBinary() const { return !isIndependent() && rhs != nullptr; }
+
+  /**
+   * Checks if the expression is a constant with a specific value
+   */
   bool constEquals(const double val) const { return isConstant() && value == val; }
+
+  /**
+   * Updates the value of the expression, traversing the expression tree and updating all expressions this expression
+   * depends on
+   */
+  void update();
 };
+
+// Arithmetic operator overloads
 
 ExpressionPtr operator+(const ExpressionPtr& x);
 ExpressionPtr operator-(const ExpressionPtr& x);
@@ -68,6 +98,8 @@ ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs);
 
 ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs);
 ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs);
+
+// STL math function overloads
 
 ExpressionPtr abs(const ExpressionPtr& x);
 ExpressionPtr sqrt(const ExpressionPtr& x);
