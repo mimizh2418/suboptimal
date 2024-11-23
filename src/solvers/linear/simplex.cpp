@@ -51,10 +51,12 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
 
   // Leaving variable selection
   double min_ratio = std::numeric_limits<double>::infinity();
-  const VectorXd ratios =
-      tableau(seqN(0, tableau.rows() - 1), last).cwiseQuotient(tableau(seqN(0, tableau.rows() - 1), pivot_col));
-  for (Index i = 0; i < ratios.size(); i++) {
-    const double ratio = ratios(i);
+  const MatrixXd::ConstColXpr pivot_col_coeffs = tableau.col(pivot_col);
+  const MatrixXd::ConstColXpr rhs_coeffs = tableau.col(tableau.cols() - 1);
+  // const VectorXd ratios =
+  //     tableau(seqN(0, tableau.rows() - 1), last).cwiseQuotient(tableau(seqN(0, tableau.rows() - 1), pivot_col));
+  for (Index i = 0; i < tableau.rows() - 1; i++) {
+    const double ratio = rhs_coeffs(i) / pivot_col_coeffs(i);
     // Pivot element cannot be 0 and ratio cannot be negative
     if (approxLEQ<double>(tableau(i, pivot_col), 0) || approxLT<double>(ratio, 0)) {
       continue;
@@ -152,10 +154,13 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
                               const SimplexSolverConfig& config) {
   Expects(solution.size() == problem.numDecisionVars());
 
-  MatrixXd constraint_matrix(problem.numConstraints(),
-                             problem.numDecisionVars() + problem.numSlackVars() + problem.numArtificialVars());
-  VectorXd constraint_rhs(problem.numConstraints());
-  problem.buildConstraints(constraint_matrix, constraint_rhs);
+  Index num_vars = problem.numDecisionVars() + problem.numSlackVars() + problem.numArtificialVars();
+
+  // Initialize tableau
+  MatrixXd tableau = MatrixXd::Zero(problem.numConstraints() + 1, num_vars + 1);
+  problem.buildConstraints(tableau.topLeftCorner(problem.numConstraints(), num_vars),
+                           tableau.topRightCorner(problem.numConstraints(), 1));
+  tableau.bottomLeftCorner(1, problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
 
   if (config.verbose) {
     std::cout << "Solving linear problem \n"
@@ -173,12 +178,6 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::Unbounded) << std::endl;
     return SolverExitStatus::Unbounded;
   }
-
-  // Initialize tableau
-  MatrixXd tableau = MatrixXd::Zero(problem.numConstraints() + 1, constraint_matrix.cols() + 1);
-  tableau.topLeftCorner(problem.numConstraints(), constraint_matrix.cols()) = constraint_matrix;
-  tableau.topRightCorner(problem.numConstraints(), 1) = constraint_rhs;
-  tableau.bottomLeftCorner(1, problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
 
   VectorX<Index> basic_vars;
   if (!problem.hasInitialBFS()) {

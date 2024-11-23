@@ -16,9 +16,9 @@ using namespace Eigen;
 
 namespace suboptimal {
 LinearProblem::LinearProblem(const Ref<const VectorXd>& objective_coeffs, const bool is_minimization)
-    : is_minimization(is_minimization),
-      objective_coeffs((is_minimization ? -1 : 1) * objective_coeffs),
-      num_decision_vars(objective_coeffs.size()) {
+    : is_minimization{is_minimization},
+      objective_coeffs{(is_minimization ? -1 : 1) * objective_coeffs},
+      num_decision_vars{objective_coeffs.size()} {
   Expects(objective_coeffs.size() > 0);
 }
 
@@ -55,16 +55,12 @@ void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coef
     type = -constraint_type;
   }
 
-  VectorXd new_constraint(coeffs.size() + 1);
+  VectorXd& new_constraint =
+      (type == 0 ? equality_constraints : (type < 0 ? less_than_constraints : greater_than_constraints)).emplace_back();
+  new_constraint.resize(coeffs.size() + 1);
+
   new_constraint.head(num_decision_vars) = coeffs;
   new_constraint(num_decision_vars) = new_rhs;
-  if (type == 0) {
-    equality_constraints.push_back(new_constraint);
-  } else if (type < 0) {
-    less_than_constraints.push_back(new_constraint);
-  } else if (type > 0) {
-    greater_than_constraints.push_back(new_constraint);
-  }
 
   num_constraints++;
 }
