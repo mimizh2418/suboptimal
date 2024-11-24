@@ -95,7 +95,6 @@ ExpressionPtr operator-(const ExpressionPtr& x);
 
 ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs);
 ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs);
-
 ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs);
 ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs);
 

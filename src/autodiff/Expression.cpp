@@ -362,7 +362,7 @@ ExpressionPtr cos(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::sin(val); },
+      ExpressionType::Nonlinear, [](const double val, double) { return std::cos(val); },
       [](const double val, double, const double parent_adjoint) { return -parent_adjoint * std::sin(val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return -parent_adjoint * suboptimal::sin(expr);
