@@ -55,6 +55,44 @@ TEST_CASE("Autodiff - Variable basic arithmetic", "[autodiff]") {
   }
 }
 
+TEST_CASE("Autodiff - Variable STL functions", "[autodiff]") {
+  Variable x{};
+  Variable y{};
+  Variable f{};
+
+  SECTION("Initial value") {
+    const double x_val = GENERATE(take(5, random(0.0, 100.0)));
+    const double y_val = GENERATE(take(5, random(0.0, 100.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+
+    f = suboptimal::sin(x) + suboptimal::cos(y) +
+        suboptimal::atan2(x, 5) * suboptimal::sqrt(y) / (suboptimal::exp(x) + suboptimal::hypot(suboptimal::log(x), y));
+    const double f_val =
+        std::sin(x_val) + std::cos(y_val) +
+        std::atan2(x_val, 5) * std::sqrt(y_val) / (std::exp(x_val) + std::hypot(std::log(x_val), y_val));
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+
+  SECTION("Value update") {
+    f = suboptimal::sin(x) + suboptimal::cos(y) +
+        suboptimal::atan2(x, 5) * suboptimal::sqrt(y) / (suboptimal::exp(x) + suboptimal::hypot(suboptimal::log(x), y));
+
+    const double x_val = GENERATE(take(5, random(0.0, 100.0)));
+    const double y_val = GENERATE(take(5, random(0.0, 100.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+    f.update();
+
+    const double f_val =
+        std::sin(x_val) + std::cos(y_val) +
+        std::atan2(x_val, 5) * std::sqrt(y_val) / (std::exp(x_val) + std::hypot(std::log(x_val), y_val));
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+}
+
 TEST_CASE("Autodiff - Variable matrix", "[autodiff]") {
   SECTION("Matrix operations") {
     const Eigen::Matrix2d x_val{{1, 2},  //

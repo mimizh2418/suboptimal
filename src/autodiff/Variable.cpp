@@ -24,102 +24,12 @@ bool Variable::setValue(const double value) {
   return false;
 }
 
-// Behold! Accursed operator overloads!
-
-Variable& Variable::operator+=(const Variable& other) {
-  *this = *this + other;
-  return *this;
-}
-
-Variable& Variable::operator-=(const Variable& other) {
-  *this = *this - other;
-  return *this;
-}
-
-Variable& Variable::operator*=(const Variable& other) {
-  *this = *this * other;
-  return *this;
-}
-
-Variable& Variable::operator/=(const Variable& other) {
-  *this = *this / other;
-  return *this;
-}
-
-Variable& Variable::operator+=(const double other) {
-  *this = *this + other;
-  return *this;
-}
-
-Variable& Variable::operator-=(const double other) {
-  *this = *this - other;
-  return *this;
-}
-
-Variable& Variable::operator*=(const double other) {
-  *this = *this * other;
-  return *this;
-}
-
-Variable& Variable::operator/=(const double other) {
-  *this = *this / other;
-  return *this;
-}
-
 Variable operator+(const Variable& x) {
   return x;
 }
 
 Variable operator-(const Variable& x) {
   return {-x.expr};
-}
-
-Variable operator+(const Variable& lhs, const Variable& rhs) {
-  return {lhs.expr + rhs.expr};
-}
-
-Variable operator-(const Variable& lhs, const Variable& rhs) {
-  return {lhs.expr - rhs.expr};
-}
-
-Variable operator*(const Variable& lhs, const Variable& rhs) {
-  return {lhs.expr * rhs.expr};
-}
-
-Variable operator/(const Variable& lhs, const Variable& rhs) {
-  return {lhs.expr / rhs.expr};
-}
-
-Variable operator+(const double lhs, const Variable& rhs) {
-  return {std::make_shared<Expression>(lhs) + rhs.expr};
-}
-
-Variable operator-(const double lhs, const Variable& rhs) {
-  return {std::make_shared<Expression>(lhs) - rhs.expr};
-}
-
-Variable operator*(const double lhs, const Variable& rhs) {
-  return {std::make_shared<Expression>(lhs) * rhs.expr};
-}
-
-Variable operator/(const double lhs, const Variable& rhs) {
-  return {std::make_shared<Expression>(lhs) / rhs.expr};
-}
-
-Variable operator+(const Variable& lhs, const double rhs) {
-  return {lhs.expr + std::make_shared<Expression>(rhs)};
-}
-
-Variable operator-(const Variable& lhs, const double rhs) {
-  return {lhs.expr - std::make_shared<Expression>(rhs)};
-}
-
-Variable operator*(const Variable& lhs, const double rhs) {
-  return {lhs.expr - std::make_shared<Expression>(rhs)};
-}
-
-Variable operator/(const Variable& lhs, const double rhs) {
-  return {lhs.expr - std::make_shared<Expression>(rhs)};
 }
 
 Variable abs(const Variable& x) {
@@ -136,14 +46,6 @@ Variable exp(const Variable& x) {
 
 Variable log(const Variable& x) {
   return {log(x.expr)};
-}
-
-Variable pow(const Variable& base, const Variable& exponent) {
-  return {pow(base.expr, exponent.expr)};
-}
-
-Variable hypot(const Variable& x, const Variable& y) {
-  return {hypot(x.expr, y.expr)};
 }
 
 Variable sin(const Variable& x) {
@@ -167,9 +69,5 @@ Variable acos(const Variable& x) {
 
 Variable atan(const Variable& x) {
   return {atan(x.expr)};
-}
-
-Variable atan2(const Variable& y, const Variable& x) {
-  return {atan2(y.expr, x.expr)};
 }
 }  // namespace suboptimal
