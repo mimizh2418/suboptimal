@@ -53,8 +53,6 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
   double min_ratio = std::numeric_limits<double>::infinity();
   const MatrixXd::ConstColXpr pivot_col_coeffs = tableau.col(pivot_col);
   const MatrixXd::ConstColXpr rhs_coeffs = tableau.col(tableau.cols() - 1);
-  // const VectorXd ratios =
-  //     tableau(seqN(0, tableau.rows() - 1), last).cwiseQuotient(tableau(seqN(0, tableau.rows() - 1), pivot_col));
   for (Index i = 0; i < tableau.rows() - 1; i++) {
     const double ratio = rhs_coeffs(i) / pivot_col_coeffs(i);
     // Pivot element cannot be 0 and ratio cannot be negative
