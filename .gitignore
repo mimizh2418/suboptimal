@@ -1,7 +1,3 @@
-cmake-build*/
-build*/
-.cache/
-
 ### C++ ###
 # Prerequisites
 *.d
@@ -36,6 +32,14 @@ build*/
 *.out
 *.app
 
+# .clangd cache
+.cache/
+
+# vcpkg files
+/vcpkg.json
+/vcpkg-configuration.json
+/vcpkg_installed/
+
 ### CMake ###
 CMakeLists.txt.user
 CMakeCache.txt
@@ -49,6 +53,10 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
+
+# Build directories
+cmake-build*/
+build*/
 
 ### macOS ###
 # General

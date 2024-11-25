@@ -1,3 +1,10 @@
+if(${CMAKE_CURRENT_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_BINARY_DIR})
+    message(
+        FATAL_ERROR
+        "In-source builds are not allowed. Please create a separate directory for build files."
+    )
+endif()
+
 cmake_minimum_required(VERSION 3.27)
 project(suboptimal)
 
