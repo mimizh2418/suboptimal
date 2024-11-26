@@ -45,7 +45,7 @@ class Variable {
    * Updates the value of the variable, traversing the expression tree and updating all expressions and variables this
    * variable depends on
    */
-  void update();
+  void update() const;
 
   /**
    * Sets the value of the variable. No-op if the variable is dependent on other variables/expressions
@@ -55,11 +55,10 @@ class Variable {
   bool setValue(double value);
 
   /**
-   * Gets the current stored value of the variable. If the variable is dependent and the variables/expressions it
-   * depends on may have changed, call update() first to get the correct value
+   * Gets the current stored value of the variable, first updating its expression tree
    * @return the value of the variable
    */
-  double getValue() const { return expr->value; }
+  double getValue() const;
 
   /**
    * Gets the degree of the expression this variable represents
@@ -251,7 +250,10 @@ Variable atan2(const Y& y, const X& x) {
 }
 }  // namespace suboptimal
 
+
+
 namespace Eigen {
+// Add Variable as an Eigen scalar type
 template <>
 struct NumTraits<suboptimal::Variable> : NumTraits<double> {
   using Real = suboptimal::Variable;
@@ -286,7 +288,6 @@ using Matrix4v = Eigen::Matrix4<Variable>;
 
 /**
  * Returns a matrix holding the values of the Variables in the input matrix
- * @tparam Derived the derived type of the input matrix
  * @param var_mat the input matrix of Variables
  * @return a double matrix holding the values of the Variables in the input matrix
  */
@@ -305,25 +306,23 @@ Eigen::Matrix<double, Derived::RowsAtCompileTime, Derived::ColsAtCompileTime> ge
 
 
 /**
-* Returns a sparse matrix holding the values of the Variables in the sparse input matrix
-* @tparam Scalar the scalar type of the input matrix
-* @tparam Options the storage scheme of the input matrix
-* @tparam StorageIndex the storage index type of the input matrix
-* @param var_mat the sparse matrix of Variables
-* @return a sparse double matrix holding the values of the Variables in the input matrix
-*/
-template <typename Scalar, int Options, typename StorageIndex>
-  requires std::same_as<Scalar, Variable>
-Eigen::SparseMatrix<double> getValues(const Eigen::SparseMatrix<Scalar, Options, StorageIndex>& var_mat) {
-  using InputMatType = Eigen::SparseMatrix<Scalar, Options, StorageIndex>;
-  using OutputMatType = Eigen::SparseMatrix<double, Options, StorageIndex>;
-
-  OutputMatType result(var_mat.rows(), var_mat.cols());
+ * Returns a sparse matrix holding the values of the Variables in the input matrix
+ * @param var_mat the input matrix of Variables
+ * @return a sparse double matrix holding the values of the Variables in the input matrix
+ */
+template <typename Derived>
+  requires std::same_as<typename Derived::Scalar, Variable>
+Eigen::SparseMatrix<double> getValuesSparse(const Eigen::MatrixBase<Derived>& var_mat) {
+  Eigen::SparseMatrix<double> result(var_mat.rows(), var_mat.cols());
   std::vector<Eigen::Triplet<double>> triplets{};
-  triplets.reserve(var_mat.nonZeros());
-  for (Eigen::Index i = 0; i < var_mat.outerSize(); i++) {
-    for (typename InputMatType::InnerIterator it(var_mat, i); it; ++it) {
-      triplets.push_back(Eigen::Triplet<double>(it.row(), it.col(), it.value().getValue()));
+
+  for (Eigen::Index i = 0; i < var_mat.rows(); i++) {
+    for (Eigen::Index j = 0; j < var_mat.cols(); j++) {
+      const double value = var_mat(i, j).getValue();
+      if (value == 0) {
+        continue;
+      }
+      triplets.emplace_back(i, j, value);
     }
   }
   result.setFromTriplets(triplets.begin(), triplets.end());

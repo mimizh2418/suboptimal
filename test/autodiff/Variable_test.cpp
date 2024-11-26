@@ -14,7 +14,7 @@
 using namespace suboptimal;
 
 TEST_CASE("Autodiff - Variable constructor", "[autodiff]") {
-  const Variable x{1.0};
+  Variable x{1.0};
   CHECK(x.getValue() == 1.0);
   CHECK(x.getType() == ExpressionType::Linear);
 
@@ -49,7 +49,6 @@ TEST_CASE("Autodiff - Variable basic arithmetic", "[autodiff]") {
     x.setValue(x_val);
     y.setValue(y_val);
 
-    f.update();
     CHECK_THAT(f.getValue(),
                Catch::Matchers::WithinAbs(1.0 + (x_val + y_val) * (x_val - y_val) / (x_val * y_val), 1e-9));
   }
@@ -84,7 +83,6 @@ TEST_CASE("Autodiff - Variable STL functions", "[autodiff]") {
 
     x.setValue(x_val);
     y.setValue(y_val);
-    f.update();
 
     const double f_val =
         std::sin(x_val) + std::cos(y_val) +
@@ -107,34 +105,7 @@ TEST_CASE("Autodiff - Eigen Variable support", "[autodiff]") {
                      {Variable{7}, Variable{8}}};
     const Matrix2v f = x * y;
     CHECK(suboptimal::getValues(f).isApprox(f_val));
-  }
-
-  SECTION("Sparse matrix operations") {
-    Eigen::SparseMatrix<double> x_val(2, 2);
-    x_val.insert(0, 0) = 1;
-    x_val.insert(0, 1) = 2;
-    x_val.insert(1, 0) = 3;
-    x_val.insert(1, 1) = 4;
-    Eigen::SparseMatrix<double> y_val(2, 2);
-    y_val.insert(0, 0) = 5;
-    y_val.insert(0, 1) = 6;
-    y_val.insert(1, 0) = 7;
-    y_val.insert(1, 1) = 8;
-    const Eigen::SparseMatrix<double> f_val = x_val * y_val;
-
-    Eigen::SparseMatrix<Variable> x(2, 2);
-    x.insert(0, 0) = Variable{1};
-    x.insert(0, 1) = Variable{2};
-    x.insert(1, 0) = Variable{3};
-    x.insert(1, 1) = Variable{4};
-    Eigen::SparseMatrix<Variable> y(2, 2);
-    y.insert(0, 0) = Variable{5};
-    y.insert(0, 1) = Variable{6};
-    y.insert(1, 0) = Variable{7};
-    y.insert(1, 1) = Variable{8};
-    const Eigen::SparseMatrix<Variable> f = x * y;
-
-    CHECK(suboptimal::getValues(f).isApprox(f_val));
+    CHECK(suboptimal::getValuesSparse(f).isApprox(f_val));
   }
 
   SECTION("Vector operations") {

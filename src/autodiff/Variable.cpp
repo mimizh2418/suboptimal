@@ -12,7 +12,7 @@ Variable::Variable(const ExpressionPtr& expr) : expr{expr} {}
 
 Variable::Variable(ExpressionPtr&& expr) : expr{std::move(expr)} {}
 
-void Variable::update() {
+void Variable::update() const {
   expr->update();
 }
 
@@ -22,6 +22,11 @@ bool Variable::setValue(const double value) {
     return true;
   }
   return false;
+}
+
+double Variable::getValue() const {
+  update();
+  return expr->value;
 }
 
 Variable operator+(const Variable& x) {
