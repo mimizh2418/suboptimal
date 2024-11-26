@@ -3,8 +3,10 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include <Eigen/Core>
+#include <Eigen/SparseCore>
 
 #include "suboptimal/autodiff/Expression.h"
 #include "suboptimal/util/concepts.h"
@@ -247,18 +249,6 @@ Variable atan2(const Y& y, const X& x) {
     return {atan2(y.expr, x.expr)};
   }
 }
-
-// Eigen typedefs
-
-using VectorXv = Eigen::VectorX<Variable>;
-using Vector2v = Eigen::Vector2<Variable>;
-using Vector3v = Eigen::Vector3<Variable>;
-using Vector4v = Eigen::Vector4<Variable>;
-
-using MatrixXv = Eigen::MatrixX<Variable>;
-using Matrix2v = Eigen::Matrix2<Variable>;
-using Matrix3v = Eigen::Matrix3<Variable>;
-using Matrix4v = Eigen::Matrix4<Variable>;
 }  // namespace suboptimal
 
 namespace Eigen {
@@ -280,3 +270,63 @@ struct NumTraits<suboptimal::Variable> : NumTraits<double> {
   };
 };
 }  // namespace Eigen
+
+namespace suboptimal {
+// Eigen typedefs
+
+using VectorXv = Eigen::VectorX<Variable>;
+using Vector2v = Eigen::Vector2<Variable>;
+using Vector3v = Eigen::Vector3<Variable>;
+using Vector4v = Eigen::Vector4<Variable>;
+
+using MatrixXv = Eigen::MatrixX<Variable>;
+using Matrix2v = Eigen::Matrix2<Variable>;
+using Matrix3v = Eigen::Matrix3<Variable>;
+using Matrix4v = Eigen::Matrix4<Variable>;
+
+/**
+ * Returns a matrix holding the values of the Variables in the input matrix
+ * @tparam Derived the derived type of the input matrix
+ * @param var_mat the input matrix of Variables
+ * @return a double matrix holding the values of the Variables in the input matrix
+ */
+template <typename Derived>
+  requires std::same_as<typename Derived::Scalar, Variable>
+Eigen::Matrix<double, Derived::RowsAtCompileTime, Derived::ColsAtCompileTime> getValues(
+    const Eigen::MatrixBase<Derived>& var_mat) {
+  Eigen::Matrix<double, Derived::RowsAtCompileTime, Derived::ColsAtCompileTime> result(var_mat.rows(), var_mat.cols());
+  for (Eigen::Index i = 0; i < var_mat.rows(); i++) {
+    for (Eigen::Index j = 0; j < var_mat.cols(); j++) {
+      result(i, j) = var_mat(i, j).getValue();
+    }
+  }
+  return result;
+}
+
+
+/**
+* Returns a sparse matrix holding the values of the Variables in the sparse input matrix
+* @tparam Scalar the scalar type of the input matrix
+* @tparam Options the storage scheme of the input matrix
+* @tparam StorageIndex the storage index type of the input matrix
+* @param var_mat the sparse matrix of Variables
+* @return a sparse double matrix holding the values of the Variables in the input matrix
+*/
+template <typename Scalar, int Options, typename StorageIndex>
+  requires std::same_as<Scalar, Variable>
+Eigen::SparseMatrix<double> getValues(const Eigen::SparseMatrix<Scalar, Options, StorageIndex>& var_mat) {
+  using InputMatType = Eigen::SparseMatrix<Scalar, Options, StorageIndex>;
+  using OutputMatType = Eigen::SparseMatrix<double, Options, StorageIndex>;
+
+  OutputMatType result(var_mat.rows(), var_mat.cols());
+  std::vector<Eigen::Triplet<double>> triplets{};
+  triplets.reserve(var_mat.nonZeros());
+  for (Eigen::Index i = 0; i < var_mat.outerSize(); i++) {
+    for (typename InputMatType::InnerIterator it(var_mat, i); it; ++it) {
+      triplets.push_back(Eigen::Triplet<double>(it.row(), it.col(), it.value().getValue()));
+    }
+  }
+  result.setFromTriplets(triplets.begin(), triplets.end());
+  return result;
+}
+}  // namespace suboptimal

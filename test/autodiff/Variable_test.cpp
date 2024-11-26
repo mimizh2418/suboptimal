@@ -93,7 +93,7 @@ TEST_CASE("Autodiff - Variable STL functions", "[autodiff]") {
   }
 }
 
-TEST_CASE("Autodiff - Variable matrix", "[autodiff]") {
+TEST_CASE("Autodiff - Eigen Variable support", "[autodiff]") {
   SECTION("Matrix operations") {
     const Eigen::Matrix2d x_val{{1, 2},  //
                                 {3, 4}};
@@ -106,10 +106,35 @@ TEST_CASE("Autodiff - Variable matrix", "[autodiff]") {
     const Matrix2v y{{Variable{5}, Variable{6}},  //
                      {Variable{7}, Variable{8}}};
     const Matrix2v f = x * y;
+    CHECK(suboptimal::getValues(f).isApprox(f_val));
+  }
 
-    for (Eigen::Index i = 0; i < f.reshaped().size(); i++) {
-      CHECK_THAT(f.reshaped()(i).getValue(), Catch::Matchers::WithinAbs(f_val(i), 1e-9));
-    }
+  SECTION("Sparse matrix operations") {
+    Eigen::SparseMatrix<double> x_val(2, 2);
+    x_val.insert(0, 0) = 1;
+    x_val.insert(0, 1) = 2;
+    x_val.insert(1, 0) = 3;
+    x_val.insert(1, 1) = 4;
+    Eigen::SparseMatrix<double> y_val(2, 2);
+    y_val.insert(0, 0) = 5;
+    y_val.insert(0, 1) = 6;
+    y_val.insert(1, 0) = 7;
+    y_val.insert(1, 1) = 8;
+    const Eigen::SparseMatrix<double> f_val = x_val * y_val;
+
+    Eigen::SparseMatrix<Variable> x(2, 2);
+    x.insert(0, 0) = Variable{1};
+    x.insert(0, 1) = Variable{2};
+    x.insert(1, 0) = Variable{3};
+    x.insert(1, 1) = Variable{4};
+    Eigen::SparseMatrix<Variable> y(2, 2);
+    y.insert(0, 0) = Variable{5};
+    y.insert(0, 1) = Variable{6};
+    y.insert(1, 0) = Variable{7};
+    y.insert(1, 1) = Variable{8};
+    const Eigen::SparseMatrix<Variable> f = x * y;
+
+    CHECK(suboptimal::getValues(f).isApprox(f_val));
   }
 
   SECTION("Vector operations") {
