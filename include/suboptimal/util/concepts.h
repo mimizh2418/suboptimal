@@ -5,7 +5,7 @@
 #include <type_traits>
 
 namespace suboptimal {
-class Variable;
+struct Variable;
 
 template <typename T>
 concept VariableLike = std::is_same_v<T, Variable> || std::is_arithmetic_v<T>;

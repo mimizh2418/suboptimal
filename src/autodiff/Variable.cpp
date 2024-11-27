@@ -12,8 +12,8 @@ Variable::Variable(const ExpressionPtr& expr) : expr{expr} {}
 
 Variable::Variable(ExpressionPtr&& expr) : expr{std::move(expr)} {}
 
-void Variable::update() const {
-  expr->update();
+void Variable::updateValue() const {
+  expr->updateValue();
 }
 
 bool Variable::setValue(const double value) {
@@ -25,7 +25,7 @@ bool Variable::setValue(const double value) {
 }
 
 double Variable::getValue() const {
-  update();
+  updateValue();
   return expr->value;
 }
 

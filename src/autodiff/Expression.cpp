@@ -3,6 +3,7 @@
 #include "suboptimal/autodiff/Expression.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <memory>
 #include <ranges>
@@ -11,53 +12,44 @@
 namespace suboptimal {
 Expression::Expression(const double value, const ExpressionType type) : value{value}, type{type} {}
 
-Expression::Expression(const ExpressionType type, const ValueFunc valueFunc, const AdjointValueFunc adjointValueFunc,
-                       const AdjointExprFunc adjointExprFunc, const ExpressionPtr arg)  // NOLINT
-    : value{valueFunc(arg->value, 0.0)},
+Expression::Expression(const ExpressionType type, const ValueFunc value_func, const AdjointValueFunc adjoint_value_func,
+                       const AdjointExprFunc adjoint_expr_func, const ExpressionPtr arg) // NOLINT
+    : value{value_func(arg->value, 0.0)},
       lhs{arg},
-      valueFunc{valueFunc},
-      lhsAdjointValueFunc{adjointValueFunc},
-      lhsAdjointExprFunc{adjointExprFunc},
+      value_func{value_func},
+      lhs_adjoint_value{adjoint_value_func},
+      lhs_adjoint_expr_func{adjoint_expr_func},
       type{type} {}
 
-Expression::Expression(const ExpressionType type, const ValueFunc valueFunc, const AdjointValueFunc lhsAdjointValueFunc,
-                       const AdjointValueFunc rhsAdjointValueFunc, const AdjointExprFunc lhsAdjointExprFunc,
-                       const AdjointExprFunc rhsAdjointExprFunc, const ExpressionPtr lhs,  // NOLINT
-                       const ExpressionPtr rhs)                                            // NOLINT
+Expression::Expression(const ExpressionType type, const ValueFunc valueFunc,
+                       const AdjointValueFunc lhs_adjoint_value_func, const AdjointValueFunc rhs_adjoint_value_func,
+                       const AdjointExprFunc lhs_adjoint_expr_func, const AdjointExprFunc rhs_adjoint_expr_func,
+                       const ExpressionPtr lhs,  // NOLINT
+                       const ExpressionPtr rhs)  // NOLINT
     : value{valueFunc(lhs->value, rhs->value)},
       lhs{lhs},
       rhs{rhs},
-      valueFunc{valueFunc},
-      lhsAdjointValueFunc{lhsAdjointValueFunc},
-      rhsAdjointValueFunc{rhsAdjointValueFunc},
-      lhsAdjointExprFunc{lhsAdjointExprFunc},
-      rhsAdjointExprFunc{rhsAdjointExprFunc},
+      value_func{valueFunc},
+      lhs_adjoint_value{lhs_adjoint_value_func},
+      rhs_adjoint_value_func{rhs_adjoint_value_func},
+      lhs_adjoint_expr_func{lhs_adjoint_expr_func},
+      rhs_adjoint_expr_func{rhs_adjoint_expr_func},
       type{type} {}
 
-void Expression::update() {
+void Expression::updateChildren() {
+  children.clear();
   if (isIndependent()) {
-    // Expression represents either a constant or an independent variable, so no update is needed
+    // The expression is independent, so no children need to be updated
+    children.push_back(this);
     return;
   }
 
-  std::vector<Expression*> exprs{};
   std::vector<Expression*> stack{};
-
-  if (lhs != nullptr) {
-    stack.push_back(lhs.get());
-  }
-  if (rhs != nullptr) {
-    stack.push_back(rhs.get());
-  }
+  stack.push_back(this);
   while (!stack.empty()) {
     const auto expr = stack.back();
     stack.pop_back();
-    exprs.push_back(expr);
-
-    // Don't need to update the values of independent variables
-    if (expr->isIndependent()) {
-      continue;
-    }
+    children.push_back(expr);
 
     if (expr->lhs != nullptr) {
       stack.push_back(expr->lhs.get());
@@ -66,15 +58,22 @@ void Expression::update() {
       stack.push_back(expr->rhs.get());
     }
   }
+}
 
-  for (const auto expr : std::ranges::reverse_view(exprs)) {
+void Expression::updateValue() {
+  if (isIndependent()) {
+    // Expression represents either a constant or an independent variable, so no update is needed
+    return;
+  }
+  updateChildren();
+
+  for (const auto expr : std::ranges::reverse_view(children)) {
     if (expr->isUnary()) {
-      expr->value = expr->valueFunc(expr->lhs->value, 0.0);
+      expr->value = expr->value_func(expr->lhs->value, 0.0);
     } else if (expr->isBinary()) {
-      expr->value = expr->valueFunc(expr->lhs->value, expr->rhs->value);
+      expr->value = expr->value_func(expr->lhs->value, expr->rhs->value);
     }
   }
-  value = valueFunc(lhs->value, rhs->value);
 }
 
 // operator overloading boilerplate :skull:

@@ -14,7 +14,7 @@
 using namespace suboptimal;
 
 TEST_CASE("Autodiff - Variable constructor", "[autodiff]") {
-  Variable x{1.0};
+  const Variable x{1.0};
   CHECK(x.getValue() == 1.0);
   CHECK(x.getType() == ExpressionType::Linear);
 

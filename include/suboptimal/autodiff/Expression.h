@@ -3,6 +3,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 
 #include "suboptimal/autodiff/ExpressionType.h"
 
@@ -13,7 +14,7 @@ using ExpressionPtr = std::shared_ptr<Expression>;
 /**
  * Autodiff expression node that represents a nullary, unary, or binary operation
  */
-struct Expression {
+struct Expression : std::enable_shared_from_this<Expression> {
   // LHS, RHS
   using ValueFunc = double (*)(double, double);
   // LHS, RHS, parent adjoint: adj(parent) * ∂(parent) / ∂(self)
@@ -23,20 +24,25 @@ struct Expression {
 
   double value = 0.0;
   double adjoint = 0.0;
-  ExpressionPtr adjointExpr = nullptr;
+  ExpressionPtr adjoint_expr = nullptr;
 
   ExpressionPtr lhs = nullptr;
   ExpressionPtr rhs = nullptr;
 
-  ValueFunc valueFunc = nullptr;  // Function giving the value of the expression
+  ValueFunc value_func = nullptr;  // Function giving the value of the expression
 
-  AdjointValueFunc lhsAdjointValueFunc = nullptr;  // Function giving the adjoint value of the LHS expression
-  AdjointValueFunc rhsAdjointValueFunc = nullptr;  // Function giving the adjoint value of the RHS expression
+  AdjointValueFunc lhs_adjoint_value = nullptr;       // Function giving the adjoint value of the LHS expression
+  AdjointValueFunc rhs_adjoint_value_func = nullptr;  // Function giving the adjoint value of the RHS expression
 
-  AdjointExprFunc lhsAdjointExprFunc = nullptr;  // Function giving the adjoint expression of the LHS expression
-  AdjointExprFunc rhsAdjointExprFunc = nullptr;  // Function giving the adjoint expression of the RHS expression
+  AdjointExprFunc lhs_adjoint_expr_func = nullptr;  // Function giving the adjoint expression of the LHS expression
+  AdjointExprFunc rhs_adjoint_expr_func = nullptr;  // Function giving the adjoint expression of the RHS expression
 
   ExpressionType type = ExpressionType::Constant;
+
+  int wrt_index = -1;
+
+  std::vector<Expression*> children{};  // Children of this expression sorted from parent to child
+                                        // Can be raw pointers since shared_ptrs to the children are owned by the parent
 
   /**
    * Constructs a nullary expression
@@ -46,15 +52,15 @@ struct Expression {
   /**
    * Constructs a unary expression
    */
-  Expression(ExpressionType type, ValueFunc valueFunc, AdjointValueFunc adjointValueFunc,
-             AdjointExprFunc adjointExprFunc, ExpressionPtr arg);
+  Expression(ExpressionType type, ValueFunc value_func, AdjointValueFunc adjoint_value_func,
+             AdjointExprFunc adjoint_expr_func, ExpressionPtr arg);
 
   /**
    * Constructs a binary expression
    */
-  Expression(ExpressionType type, ValueFunc valueFunc, AdjointValueFunc lhsAdjointValueFunc,
-             AdjointValueFunc rhsAdjointValueFunc, AdjointExprFunc lhsAdjointExprFunc,
-             AdjointExprFunc rhsAdjointExprFunc, ExpressionPtr lhs, ExpressionPtr rhs);
+  Expression(ExpressionType type, ValueFunc valueFunc, AdjointValueFunc lhs_adjoint_value_func,
+             AdjointValueFunc rhs_adjoint_value_func, AdjointExprFunc lhs_adjoint_expr_func,
+             AdjointExprFunc rhs_adjoint_expr_func, ExpressionPtr lhs, ExpressionPtr rhs);
 
   /**
    * Checks if the value of this expression is independent of any other expressions
@@ -82,10 +88,15 @@ struct Expression {
   bool constEquals(const double val) const { return isConstant() && value == val; }
 
   /**
+   * Updates the list of child nodes of this expression
+   */
+  void updateChildren();
+
+  /**
    * Updates the value of the expression, traversing the expression tree and updating all expressions this expression
    * depends on
    */
-  void update();
+  void updateValue();
 };
 
 // Arithmetic operator overloads
