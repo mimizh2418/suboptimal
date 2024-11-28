@@ -9,10 +9,12 @@
 #include <Eigen/SparseCore>
 
 #include "suboptimal/autodiff/Expression.h"
-#include "suboptimal/util/concepts.h"
 
 namespace suboptimal {
 struct Variable;
+
+template <typename T>
+concept VariableLike = std::is_same_v<T, Variable> || std::is_arithmetic_v<T>;
 
 // Eigen typedefs
 using VectorXv = Eigen::VectorX<Variable>;
