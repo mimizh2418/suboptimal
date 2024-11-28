@@ -1,4 +1,8 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #include "suboptimal/autodiff/derivatives.h"
+
+#include <memory>
 
 #include <Eigen/Core>
 
@@ -51,5 +55,17 @@ VectorXv gradient(const Variable& var, const Eigen::Ref<const VectorXv>& wrt) {
 
 Variable derivative(const Variable& var, const Variable& wrt) {
   return gradient(var, VectorXv{{wrt}})(0);
+}
+
+MatrixXv jacobian(const Eigen::Ref<const VectorXv>& vars, const Eigen::Ref<const VectorXv>& wrt) {
+  MatrixXv jacobian{vars.size(), wrt.size()};
+  for (int i = 0; i < vars.size(); i++) {
+    jacobian.row(i) = gradient(vars(i), wrt).transpose();
+  }
+  return jacobian;
+}
+
+MatrixXv hessian(const Variable& var, const Eigen::Ref<const VectorXv>& wrt) {
+  return jacobian(gradient(var, wrt), wrt);
 }
 }  // namespace suboptimal

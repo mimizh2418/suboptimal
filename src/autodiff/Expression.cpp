@@ -13,7 +13,7 @@ namespace suboptimal {
 Expression::Expression(const double value, const ExpressionType type) : value{value}, type{type} {}
 
 Expression::Expression(const ExpressionType type, const ValueFunc value_func, const AdjointValueFunc adjoint_value_func,
-                       const AdjointExprFunc adjoint_expr_func, const ExpressionPtr arg) // NOLINT
+                       const AdjointExprFunc adjoint_expr_func, const ExpressionPtr arg)  // NOLINT
     : value{value_func(arg->value, 0.0)},
       lhs{arg},
       value_func{value_func},
@@ -214,9 +214,9 @@ ExpressionPtr abs(const ExpressionPtr& x) {
 
   return std::make_shared<Expression>(
       ExpressionType::Nonlinear, [](const double val, double) { return std::abs(val); },
-      [](const double val, double, const double parent_adjoint) { return val < 0 ? -parent_adjoint : parent_adjoint; },
+      [](const double val, double, const double parent_adjoint) { return parent_adjoint * val / std::abs(val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
-        return expr->value < 0 ? -parent_adjoint : parent_adjoint;
+        return parent_adjoint * expr / suboptimal::abs(expr);
       },
       x);
 }

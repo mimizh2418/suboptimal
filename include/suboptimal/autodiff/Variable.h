@@ -25,7 +25,6 @@ using Matrix2v = Eigen::Matrix2<Variable>;
 using Matrix3v = Eigen::Matrix3<Variable>;
 using Matrix4v = Eigen::Matrix4<Variable>;
 
-
 /**
  * An autodiff variable. Essentially just a nicer wrapper around Expression
  */
@@ -203,7 +202,6 @@ Variable tan(const Variable& x);
 Variable asin(const Variable& x);
 Variable acos(const Variable& x);
 Variable atan(const Variable& x);
-Variable atan2(const Variable& y, const Variable& x);
 
 template <typename Y, typename X>
   requires VariableLike<Y> && VariableLike<X> && (std::same_as<Y, Variable> || std::same_as<X, Variable>)
