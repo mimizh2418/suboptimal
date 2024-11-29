@@ -9,14 +9,15 @@
 #include <vector>
 
 #include <Eigen/Core>
-#include <gsl/util>
 
 #include "suboptimal/LinearProblem.h"
 #include "suboptimal/solvers/SolverExitStatus.h"
 #include "suboptimal/solvers/linear/SimplexPivotRule.h"
 #include "suboptimal/solvers/linear/SimplexSolverConfig.h"
+#include "util/FinalAction.h"
 #include "util/SolverProfiler.h"
 #include "util/comparison_util.h"
+#include "util/assert.h"
 
 using namespace Eigen;
 
@@ -130,7 +131,7 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
     }
 
     profiler.startIteration();
-    auto end_profile_iter = gsl::finally([&] { profiler.endIteration(); });
+    auto end_profile_iter = FinalAction([&] { profiler.endIteration(); });
 
     // Find pivot position
     Index pivot_row, pivot_col;
@@ -150,7 +151,8 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
 
 SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
                               const SimplexSolverConfig& config) {
-  Expects(solution.size() == problem.numDecisionVars());
+  ASSERT(solution.size() == problem.numDecisionVars(),
+         "Solution vector must have the same size as the number of decision variables");
 
   Index num_vars = problem.numDecisionVars() + problem.numSlackVars() + problem.numArtificialVars();
 
@@ -211,7 +213,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     const SolverExitStatus aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
     const bool is_feasible = isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0);
 
-    auto print_diagnostics = gsl::finally([&] {
+    auto print_diagnostics = FinalAction([&] {
       if (!config.verbose) {
         return;
       }
@@ -265,7 +267,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
   const SolverExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
 
   // TODO why is this here
-  auto print_diagnostics = gsl::finally([&] {
+  auto print_diagnostics = FinalAction([&] {
     if (!config.verbose) {
       return;
     }

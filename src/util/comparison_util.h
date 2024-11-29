@@ -6,7 +6,7 @@
 #include <cmath>
 #include <limits>
 
-#include <gsl/assert>
+#include "util/assert.h"
 
 constexpr double EPSILON = 1e-10;
 constexpr double ABS_THRESH = 1e-10;
@@ -16,8 +16,9 @@ concept ComparableFloat = std::is_floating_point_v<T>;
 
 template <ComparableFloat T>
 bool isApprox(T a, T b, T epsilon = EPSILON, T abs_thresh = ABS_THRESH) {
-  Expects(epsilon >= std::numeric_limits<T>::epsilon() && epsilon <= 1);
-  Expects(abs_thresh >= 0);
+  ASSERT(epsilon >= std::numeric_limits<T>::epsilon() && epsilon <= 1,
+         "epsilon must be in [std::numeric_limits<T>::epsilon(), 1]");
+  ASSERT(abs_thresh >= 0, "abs_thresh must be non-negative");
 
   if (a == b) {
     return true;

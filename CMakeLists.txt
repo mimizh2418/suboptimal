@@ -38,19 +38,6 @@ target_compile_options(suboptimal PRIVATE -Wall -Wextra -Wpedantic -Werror)
 include(CTest)
 include(FetchContent)
 
-find_package(Microsoft.GSL CONFIG)
-if(NOT Microsoft.GSL_FOUND)
-    message(STATUS "Fetching GSL from https://github.com/microsoft/GSL.git")
-    fetchcontent_declare(
-        GSL
-        GIT_REPOSITORY "https://github.com/microsoft/GSL.git"
-        GIT_TAG "v4.0.0"
-        GIT_SHALLOW ON
-    )
-    fetchcontent_makeavailable(GSL)
-endif()
-target_link_libraries(suboptimal PRIVATE Microsoft.GSL::GSL)
-
 find_package(Eigen3 3.4 CONFIG)
 if(NOT Eigen3_FOUND)
     message(STATUS "Fetching Eigen3 from https://gitlab.com/libeigen/eigen.git")
