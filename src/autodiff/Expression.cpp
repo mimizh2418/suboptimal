@@ -3,7 +3,6 @@
 #include "suboptimal/autodiff/Expression.h"
 
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <memory>
 #include <ranges>
@@ -40,22 +39,43 @@ void Expression::updateChildren() {
   children.clear();
   if (isIndependent()) {
     // The expression is independent, so no children need to be updated
-    children.push_back(this);
     return;
   }
 
   std::vector<Expression*> stack{};
+
+  // Initialize the indegree of all children
   stack.push_back(this);
   while (!stack.empty()) {
     const auto expr = stack.back();
     stack.pop_back();
-    children.push_back(expr);
 
-    if (expr->lhs != nullptr) {
-      stack.push_back(expr->lhs.get());
+    // First time visiting this expression, add children to stack
+    if (expr->indegree == 0) {
+      if (expr->lhs != nullptr && !expr->lhs->isConstant()) {
+        stack.push_back(expr->lhs.get());
+      }
+      if (expr->rhs != nullptr && !expr->rhs->isConstant()) {
+        stack.push_back(expr->rhs.get());
+      }
     }
-    if (expr->rhs != nullptr) {
-      stack.push_back(expr->rhs.get());
+    expr->indegree++;
+  }
+
+  stack.push_back(this);
+  while (!stack.empty()) {
+    const auto expr = stack.back();
+    stack.pop_back();
+    expr->indegree--;
+
+    if (expr->indegree == 0) {
+      children.push_back(expr);
+      if (expr->lhs != nullptr && !expr->lhs->isConstant()) {
+        stack.push_back(expr->lhs.get());
+      }
+      if (expr->rhs != nullptr && !expr->rhs->isConstant()) {
+        stack.push_back(expr->rhs.get());
+      }
     }
   }
 }

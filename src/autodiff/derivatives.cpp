@@ -24,11 +24,11 @@ VectorXv gradient(const Variable& var, const Eigen::Ref<const VectorXv>& wrt) {
   // Compute adjoint expressions
   VectorXv grad{wrt.size()};
   for (const auto expr : var.expr->children) {
-    if (expr->lhs != nullptr && !expr->lhs->constEquals(0.0)) {
+    if (expr->lhs != nullptr && !expr->lhs->isConstant()) {
       expr->lhs->adjoint_expr =
           expr->lhs->adjoint_expr + expr->lhs_adjoint_expr_func(expr->lhs, expr->rhs, expr->adjoint_expr);
     }
-    if (expr->rhs != nullptr && !expr->rhs->constEquals(0.0)) {
+    if (expr->rhs != nullptr && !expr->rhs->isConstant()) {
       expr->rhs->adjoint_expr =
           expr->rhs->adjoint_expr + expr->rhs_adjoint_expr_func(expr->lhs, expr->rhs, expr->adjoint_expr);
     }

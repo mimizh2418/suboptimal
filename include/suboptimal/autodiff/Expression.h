@@ -14,7 +14,7 @@ using ExpressionPtr = std::shared_ptr<Expression>;
 /**
  * Autodiff expression node that represents a nullary, unary, or binary operation
  */
-struct Expression : std::enable_shared_from_this<Expression> {
+struct Expression {
   // LHS, RHS
   using ValueFunc = double (*)(double, double);
   // LHS, RHS, parent adjoint: adj(parent) * ∂(parent) / ∂(self)
@@ -41,7 +41,8 @@ struct Expression : std::enable_shared_from_this<Expression> {
 
   int wrt_index = -1;
 
-  std::vector<Expression*> children{};  // Children of this expression sorted from parent to child
+  int indegree = 0;
+  std::vector<Expression*> children{};  // Children of this expression sorted from parent to child, excluding constants.
                                         // Can be raw pointers since shared_ptrs to the children are owned by the parent
 
   /**
