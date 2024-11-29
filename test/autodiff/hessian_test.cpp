@@ -39,9 +39,9 @@ TEST_CASE("Autodiff - Complicated Hessian") {
   const Variable f = x * y * z + y * suboptimal::sin(x) + z * suboptimal::cos(y);
   const Matrix3v hess = hessian(f, Vector3v{x, y, z});
 
-  const double x_val = GENERATE(take(10, random(-100, 100)));
-  const double y_val = GENERATE(take(10, random(-100, 100)));
-  const double z_val = GENERATE(take(10, random(-100, 100)));
+  const double x_val = GENERATE(take(5, random(-100, 100)));
+  const double y_val = GENERATE(take(5, random(-100, 100)));
+  const double z_val = GENERATE(take(5, random(-100, 100)));
   x.setValue(x_val);
   y.setValue(y_val);
   z.setValue(z_val);

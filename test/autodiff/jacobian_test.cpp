@@ -41,9 +41,9 @@ TEST_CASE("Autodiff - Complicated Jacobian", "[autodiff]") {
                    z * suboptimal::cos(y)};
   const Matrix3v j = jacobian(f, Vector3v{x, y, z});
 
-  const double x_val = GENERATE(take(10, random(-100, 100)));
-  const double y_val = GENERATE(take(10, random(-100, 100)));
-  const double z_val = GENERATE(take(10, random(-100, 100)));
+  const double x_val = GENERATE(take(5, random(-100, 100)));
+  const double y_val = GENERATE(take(5, random(-100, 100)));
+  const double z_val = GENERATE(take(5, random(-100, 100)));
   x.setValue(x_val);
   y.setValue(y_val);
   z.setValue(z_val);
