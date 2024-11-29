@@ -8,9 +8,9 @@
 
 #include <Eigen/Core>
 
+#include "util/assert.h"
 #include "util/comparison_util.h"
 #include "util/expression_util.h"
-#include "util/assert.h"
 
 using namespace Eigen;
 

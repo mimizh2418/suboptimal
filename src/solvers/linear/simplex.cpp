@@ -16,8 +16,8 @@
 #include "suboptimal/solvers/linear/SimplexSolverConfig.h"
 #include "util/FinalAction.h"
 #include "util/SolverProfiler.h"
-#include "util/comparison_util.h"
 #include "util/assert.h"
+#include "util/comparison_util.h"
 
 using namespace Eigen;
 
