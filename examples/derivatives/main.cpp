@@ -3,10 +3,10 @@
 #include <suboptimal/autodiff/Variable.h>
 #include <suboptimal/autodiff/derivatives.h>
 
+#include <array>
 #include <cmath>
 #include <format>
 #include <iostream>
-#include <vector>
 
 int main() {
   suboptimal::Variable x{};
@@ -17,7 +17,7 @@ int main() {
   constexpr double max = 1.0;
   constexpr double step = 0.1;
 
-  std::vector<double> x_vals(static_cast<int>((max - min) / step) + 1);
+  std::array<double, static_cast<int>(max - min / step) + 1> x_vals{};
   for (unsigned int i = 0; i < x_vals.size(); i++) {
     x_vals[i] = min + i * step;
   }
