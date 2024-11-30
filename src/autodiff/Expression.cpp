@@ -16,7 +16,7 @@ Expression::Expression(const Linearity linearity, const ValueFunc value_func, co
     : value{value_func(arg->value, 0.0)},
       lhs{arg},
       value_func{value_func},
-      lhs_adjoint_value{adjoint_value_func},
+      lhs_adjoint_value_func{adjoint_value_func},
       lhs_adjoint_expr_func{adjoint_expr_func},
       linearity{linearity} {}
 
@@ -29,7 +29,7 @@ Expression::Expression(const Linearity linearity, const ValueFunc valueFunc,
       lhs{lhs},
       rhs{rhs},
       value_func{valueFunc},
-      lhs_adjoint_value{lhs_adjoint_value_func},
+      lhs_adjoint_value_func{lhs_adjoint_value_func},
       rhs_adjoint_value_func{rhs_adjoint_value_func},
       lhs_adjoint_expr_func{lhs_adjoint_expr_func},
       rhs_adjoint_expr_func{rhs_adjoint_expr_func},
@@ -96,6 +96,29 @@ void Expression::updateValue() {
   }
 }
 
+void Expression::updateAdjoints() {
+  if (isConstant()) {
+    // Constants always have an adjoint of 0
+    adjoint = 0.0;
+    return;
+  }
+  updateValue();
+
+  // Initialize adjoints
+  std::ranges::for_each(children, [](Expression* expr) { expr->adjoint = 0.0; });
+  adjoint = 1.0;
+
+  for (const auto expr : children) {
+    if (expr->lhs != nullptr && !expr->lhs->isConstant()) {
+      const double expr_rhs = expr->rhs != nullptr ? expr->rhs->value : 0.0;
+      expr->lhs->adjoint += expr->lhs_adjoint_value_func(expr->lhs->value, expr_rhs, expr->adjoint);
+    }
+    if (expr->rhs != nullptr && !expr->rhs->isConstant()) {
+      expr->rhs->adjoint += expr->rhs_adjoint_value_func(expr->lhs->value, expr->rhs->value, expr->adjoint);
+    }
+  }
+}
+
 // operator overloading boilerplate :skull:
 // TODO operator null checks
 
@@ -127,7 +150,8 @@ ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   }
 
   return std::make_shared<Expression>(
-      std::max(lhs->linearity, rhs->linearity), [](const double lhs_val, const double rhs_val) { return lhs_val + rhs_val; },
+      std::max(lhs->linearity, rhs->linearity),
+      [](const double lhs_val, const double rhs_val) { return lhs_val + rhs_val; },
       [](double, double, const double parent_adjoint) { return parent_adjoint; },
       [](double, double, const double parent_adjoint) { return parent_adjoint; },
       [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) { return parent_adjoint; },
@@ -147,7 +171,8 @@ ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   }
 
   return std::make_shared<Expression>(
-      std::max(lhs->linearity, rhs->linearity), [](const double lhs_val, const double rhs_val) { return lhs_val - rhs_val; },
+      std::max(lhs->linearity, rhs->linearity),
+      [](const double lhs_val, const double rhs_val) { return lhs_val - rhs_val; },
       [](double, double, const double parent_adjoint) { return parent_adjoint; },
       [](double, double, const double parent_adjoint) { return -parent_adjoint; },
       [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) { return parent_adjoint; },

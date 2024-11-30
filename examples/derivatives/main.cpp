@@ -11,7 +11,7 @@
 int main() {
   suboptimal::Variable x{};
   const suboptimal::Variable y = 1.0 / (1.0 + suboptimal::exp(-x));  // Sigmoid function
-  const suboptimal::Variable dydx = suboptimal::derivative(y, x);
+  suboptimal::Derivative dydx{y, x};
 
   constexpr double min = -1.0;
   constexpr double max = 1.0;
