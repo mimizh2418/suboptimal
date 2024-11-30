@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include <concepts>
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 #include <Eigen/Core>
@@ -15,7 +17,7 @@ namespace suboptimal {
 struct Variable;
 
 template <typename T>
-concept VariableLike = std::is_same_v<T, Variable> || std::is_arithmetic_v<T>;
+concept VariableLike = std::same_as<T, Variable> || std::is_arithmetic_v<T>;
 
 // Eigen typedefs
 using VectorXv = Eigen::VectorX<Variable>;
