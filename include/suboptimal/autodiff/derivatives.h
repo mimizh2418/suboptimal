@@ -23,6 +23,13 @@ class Gradient {
   Gradient(const Variable& var, const Eigen::Ref<const VectorXv>& wrt);
 
   /**
+   * Constructs a gradient object
+   * @param var the variable to compute the gradient of
+   * @param wrt the list of variables to compute the gradient with respect to
+   */
+  Gradient(const Variable& var, std::initializer_list<Variable> wrt);
+
+  /**
    * Gets the value of the gradient based on the current value of wrt
    */
   const Eigen::SparseVector<double>& getValue();
@@ -83,6 +90,13 @@ class Jacobian {
   Jacobian(const Eigen::Ref<const VectorXv>& vars, const Eigen::Ref<const VectorXv>& wrt);
 
   /**
+   * Constructs a Jacobian object
+   * @param vars the variable to compute the gradient of
+   * @param wrt the list of variables to compute the gradient with respect to
+   */
+  Jacobian(const Eigen::Ref<const VectorXv>& vars, std::initializer_list<Variable> wrt);
+
+  /**
    * Gets the value of the Jacobian based on the current value of wrt
    */
   const Eigen::SparseMatrix<double>& getValue();
@@ -114,6 +128,13 @@ class Hessian {
    * @param wrt the vector of variables to compute the Hessian with respect to
    */
   Hessian(const Variable& var, const Eigen::Ref<const VectorXv>& wrt);
+
+  /**
+   * Constructs a Hessian object
+   * @param var the variable to compute the gradient of
+   * @param wrt the list of variables to compute the Hessian with respect to
+   */
+  Hessian(const Variable& var, std::initializer_list<Variable> wrt);
 
   /**
    * Gets the value of the Hessian based on the current value of wrt

@@ -17,6 +17,8 @@ Gradient::Gradient(const Variable& var, const Eigen::Ref<const VectorXv>& wrt) :
   }
 }
 
+Gradient::Gradient(const Variable& var, const std::initializer_list<Variable> wrt) : Gradient{var, VectorXv{wrt}} {}
+
 const Eigen::SparseVector<double>& Gradient::getValue() {
   if (var.getLinearity() > Linearity::Linear) {
     std::ranges::for_each(wrt, [](const Variable& v) { v.expr->adjoint = 0.0; });
@@ -112,6 +114,9 @@ Jacobian::Jacobian(const Eigen::Ref<const VectorXv>& vars, const Eigen::Ref<cons
   value.setFromTriplets(triplets.begin(), triplets.end());
 }
 
+Jacobian::Jacobian(const Eigen::Ref<const VectorXv>& vars, const std::initializer_list<Variable> wrt)
+    : Jacobian{vars, VectorXv{wrt}} {}
+
 const Eigen::SparseMatrix<double>& Jacobian::getValue() {
   if (nonlinear_rows.empty()) {
     return value;
@@ -138,6 +143,8 @@ MatrixXv Jacobian::getExpr() {
 
 Hessian::Hessian(const Variable& var, const Eigen::Ref<const VectorXv>& wrt)
     : jacobian(Gradient{var, wrt}.getExpr(), wrt) {}
+
+Hessian::Hessian(const Variable& var, const std::initializer_list<Variable> wrt) : Hessian{var, VectorXv{wrt}} {}
 
 const Eigen::SparseMatrix<double>& Hessian::getValue() {
   return jacobian.getValue();

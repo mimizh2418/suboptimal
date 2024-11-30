@@ -21,7 +21,7 @@ TEST_CASE("Autodiff - Basic Jacobian", "[autodiff]") {
   Variable y{};
   const Vector2v f{4 * suboptimal::pow(x, 2) * y,  //
                    x - suboptimal::pow(y, 2)};
-  Jacobian j{f, Vector2v{x, y}};
+  Jacobian j{f, {x, y}};
 
   const double x_val = GENERATE(take(10, random(-100, 100)));
   const double y_val = GENERATE(take(10, random(-100, 100)));
@@ -42,7 +42,7 @@ TEST_CASE("Autodiff - Complicated Jacobian", "[autodiff]") {
   const Vector3v f{x * y * z,               //
                    y * suboptimal::sin(x),  //
                    z * suboptimal::cos(y)};
-  Jacobian j{f, Vector3v{x, y, z}};
+  Jacobian j{f, {x, y, z}};
 
   const double x_val = GENERATE(take(5, random(-100.0, 100.0)));
   const double y_val = GENERATE(take(5, random(-100.0, 100.0)));

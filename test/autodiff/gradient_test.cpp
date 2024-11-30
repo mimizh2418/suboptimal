@@ -21,7 +21,7 @@ TEST_CASE("Autodiff - Basic gradient", "[autodiff]") {
   Variable x{};
   Variable y{};
   const Variable f = (x * x - 2 * x * y + y * y) / (5 * x);
-  Gradient grad{f, Vector2v{x, y}};
+  Gradient grad{f, {x, y}};
 
   const double x_val = GENERATE(take(10, random(-100.0, 100.0)));
   const double y_val = GENERATE(take(10, random(-100.0, 100.0)));
@@ -37,7 +37,7 @@ TEST_CASE("Autodiff - Basic gradient", "[autodiff]") {
 TEST_CASE("Autodiff - Gradient of abs", "[autodiff]") {
   Variable x{};
   const Variable f = suboptimal::abs(x);
-  Gradient grad{f, VectorXv{{x}}};
+  Gradient grad{f, {x}};
 
   const double x_val = GENERATE(take(10, random(-100.0, 100.0)));
   x.setValue(x_val);
@@ -72,7 +72,7 @@ TEST_CASE("Autodiff - Gradient of exp", "[autodiff]") {
   Variable x{};
   Variable y{};
   const Variable f = suboptimal::exp(x * y);
-  Gradient grad{f, Vector2v{x, y}};
+  Gradient grad{f, {x, y}};
 
   const double x_val = GENERATE(take(10, random(-10.0, 10.0)));
   const double y_val = GENERATE(take(10, random(-10.0, 10.0)));
@@ -89,7 +89,7 @@ TEST_CASE("Autodiff - Gradient of log", "[autodiff]") {
   Variable x{};
   Variable y{};
   const Variable f = suboptimal::log(x * y);
-  Gradient grad{f, Vector2v{x, y}};
+  Gradient grad{f, {x, y}};
 
   const double x_val = GENERATE(take(10, random(0.1, 100.0)));
   const double y_val = GENERATE(take(10, random(0.1, 100.0)));
@@ -106,7 +106,7 @@ TEST_CASE("Autodiff - Gradient of pow", "[autodiff]") {
   Variable x{};
   Variable y{};
   const Variable f = suboptimal::pow(x, y);
-  Gradient grad{f, Vector2v{x, y}};
+  Gradient grad{f, {x, y}};
 
   const double x_val = GENERATE(take(10, random(0.0, 100.0)));
   const double y_val = GENERATE(take(10, random(-100.0, 100.0)));
@@ -123,7 +123,7 @@ TEST_CASE("Autodiff - Gradient of hypot", "[autodiff]") {
   Variable x{};
   Variable y{};
   const Variable f = suboptimal::hypot(x, y);
-  Gradient grad{f, Vector2v{x, y}};
+  Gradient grad{f, {x, y}};
 
   const double x_val = GENERATE(take(10, random(-100.0, 100.0)));
   const double y_val = GENERATE(take(10, random(-100.0, 100.0)));
@@ -141,7 +141,7 @@ TEST_CASE("Autodiff - Gradients of trig functions", "[autodiff]") {
   Variable y{};
   Variable z{};
   const Variable f = suboptimal::sin(x) * suboptimal::cos(y) * suboptimal::tan(z);
-  Gradient grad{f, Vector3v{x, y, z}};
+  Gradient grad{f, {x, y, z}};
 
   const double x_val = GENERATE(take(5, random(-100.0, 100.0)));
   const double y_val = GENERATE(take(5, random(-100.0, 100.0)));
@@ -162,7 +162,7 @@ TEST_CASE("Autodiff - Gradients of inverse trig functions", "[autodiff]") {
   Variable y{};
   Variable z{};
   const Variable f = suboptimal::asin(x) * suboptimal::acos(y) * suboptimal::atan(z);
-  Gradient grad{f, Vector3v{x, y, z}};
+  Gradient grad{f, {x, y, z}};
 
   const double x_val = GENERATE(take(5, random(-1.0, 1.0)));
   const double y_val = GENERATE(take(5, random(-1.0, 1.0)));
@@ -182,7 +182,7 @@ TEST_CASE("Autodiff - Gradient of atan2", "[autodiff]") {
   Variable x{};
   Variable y{};
   const Variable f = suboptimal::atan2(y, x);
-  Gradient grad{f, Vector2v{x, y}};
+  Gradient grad{f, {x, y}};
 
   const double x_val = GENERATE(take(10, random(-100.0, 100.0)));
   const double y_val = GENERATE(take(10, random(-100.0, 100.0)));

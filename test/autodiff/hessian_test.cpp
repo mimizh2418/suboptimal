@@ -19,7 +19,7 @@ TEST_CASE("Autodiff - Basic Hessian") {
   Variable x{};
   Variable y{};
   const Variable f = (x * x - 2 * x * y + y * y);
-  Hessian h{f, Vector2v{x, y}};
+  Hessian h{f, {x, y}};
 
   const double x_val = GENERATE(take(10, random(-100, 100)));
   const double y_val = GENERATE(take(10, random(-100, 100)));
@@ -38,7 +38,7 @@ TEST_CASE("Autodiff - Complicated Hessian") {
   Variable y{};
   Variable z{};
   const Variable f = x * y * z + y * suboptimal::sin(x) + z * suboptimal::cos(y);
-  Hessian h{f, Vector3v{x, y, z}};
+  Hessian h{f, {x, y, z}};
 
   const double x_val = GENERATE(take(5, random(-100, 100)));
   const double y_val = GENERATE(take(5, random(-100, 100)));
