@@ -47,10 +47,9 @@ TEST_CASE("Autodiff - Complicated Hessian") {
   y.setValue(y_val);
   z.setValue(z_val);
 
-  const auto expected_h =
-      Eigen::Matrix3d{{-y_val * std::sin(x_val), std::cos(x_val) + z_val, y_val},
-                      {std::cos(x_val) + z_val, -z_val * std::cos(y_val), x_val - std::sin(y_val)},
-                      {y_val, x_val - std::sin(y_val), 0}};
+  const auto expected_h = Eigen::Matrix3d{{-y_val * std::sin(x_val), std::cos(x_val) + z_val, y_val},
+                                          {std::cos(x_val) + z_val, -z_val * std::cos(y_val), x_val - std::sin(y_val)},
+                                          {y_val, x_val - std::sin(y_val), 0}};
   CHECK(h.getValue().isApprox(expected_h));
   CHECK(suboptimal::getValues(h.getExpr()).isApprox(expected_h));
 }

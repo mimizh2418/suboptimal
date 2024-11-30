@@ -122,11 +122,13 @@ std::vector<std::string> LinearProblem::constraintStrings() const {
   std::vector<std::string> ret(num_constraints);
   size_t current_constraint_index = 0;
   for (size_t i = 0; i < equality_constraints.size(); i++, current_constraint_index++) {
-    ret[current_constraint_index] = linearExpressionFromCoeffs(equality_constraints[i].head(num_decision_vars).eval(), "x");
+    ret[current_constraint_index] =
+        linearExpressionFromCoeffs(equality_constraints[i].head(num_decision_vars).eval(), "x");
     ret[current_constraint_index] += std::format(" = {}", equality_constraints[i](num_decision_vars));
   }
   for (size_t i = 0; i < less_than_constraints.size(); i++, current_constraint_index++) {
-    ret[current_constraint_index] = linearExpressionFromCoeffs(less_than_constraints[i].head(num_decision_vars).eval(), "x");
+    ret[current_constraint_index] =
+        linearExpressionFromCoeffs(less_than_constraints[i].head(num_decision_vars).eval(), "x");
     ret[current_constraint_index] += std::format(" ≤ {}", less_than_constraints[i](num_decision_vars));
   }
   for (size_t i = 0; i < greater_than_constraints.size(); i++, current_constraint_index++) {

@@ -8,7 +8,7 @@
 #include <Eigen/Core>
 
 inline std::string linearExpressionFromCoeffs(const Eigen::Ref<const Eigen::VectorXd>& coeffs,
-                                        const std::string& variable_name) {
+                                              const std::string& variable_name) {
   std::string ret;
   bool first = true;
   for (Eigen::Index i = 0; i < coeffs.size(); i++) {
