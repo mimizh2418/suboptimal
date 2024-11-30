@@ -6,7 +6,7 @@
 #include <utility>
 
 namespace suboptimal {
-Variable::Variable(double value) : expr{std::make_shared<Expression>(value, ExpressionType::Linear)} {}
+Variable::Variable(double value) : expr{std::make_shared<Expression>(value, Linearity::Linear)} {}
 
 Variable::Variable(const ExpressionPtr& expr) : expr{expr} {}
 

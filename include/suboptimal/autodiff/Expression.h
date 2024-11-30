@@ -5,7 +5,7 @@
 #include <memory>
 #include <vector>
 
-#include "suboptimal/autodiff/ExpressionType.h"
+#include "suboptimal/autodiff/Linearity.h"
 
 namespace suboptimal {
 struct Expression;
@@ -37,7 +37,7 @@ struct Expression {
   AdjointExprFunc lhs_adjoint_expr_func = nullptr;  // Function giving the adjoint expression of the LHS expression
   AdjointExprFunc rhs_adjoint_expr_func = nullptr;  // Function giving the adjoint expression of the RHS expression
 
-  ExpressionType type = ExpressionType::Constant;
+  Linearity linearity = Linearity::Constant;
 
   int wrt_index = -1;
 
@@ -48,18 +48,18 @@ struct Expression {
   /**
    * Constructs a nullary expression
    */
-  explicit Expression(double value, ExpressionType type = ExpressionType::Constant);
+  explicit Expression(double value, Linearity linearity = Linearity::Constant);
 
   /**
    * Constructs a unary expression
    */
-  Expression(ExpressionType type, ValueFunc value_func, AdjointValueFunc adjoint_value_func,
+  Expression(Linearity linearity, ValueFunc value_func, AdjointValueFunc adjoint_value_func,
              AdjointExprFunc adjoint_expr_func, ExpressionPtr arg);
 
   /**
    * Constructs a binary expression
    */
-  Expression(ExpressionType type, ValueFunc valueFunc, AdjointValueFunc lhs_adjoint_value_func,
+  Expression(Linearity linearity, ValueFunc valueFunc, AdjointValueFunc lhs_adjoint_value_func,
              AdjointValueFunc rhs_adjoint_value_func, AdjointExprFunc lhs_adjoint_expr_func,
              AdjointExprFunc rhs_adjoint_expr_func, ExpressionPtr lhs, ExpressionPtr rhs);
 
@@ -71,7 +71,7 @@ struct Expression {
   /**
    * Checks if the value of this expression is constant
    */
-  bool isConstant() const { return isIndependent() && type == ExpressionType::Constant; }
+  bool isConstant() const { return isIndependent() && linearity == Linearity::Constant; }
 
   /**
    * Checks if the expression represents a unary operation

@@ -9,6 +9,7 @@
 #include <Eigen/SparseCore>
 
 #include "suboptimal/autodiff/Expression.h"
+#include "suboptimal/autodiff/Linearity.h"
 
 namespace suboptimal {
 struct Variable;
@@ -31,7 +32,7 @@ using Matrix4v = Eigen::Matrix4<Variable>;
  * An autodiff variable. Essentially just a nicer wrapper around Expression
  */
 struct Variable {
-  ExpressionPtr expr = std::make_shared<Expression>(0.0, ExpressionType::Linear);
+  ExpressionPtr expr = std::make_shared<Expression>(0.0, Linearity::Linear);
 
   /**
    * Constructs an independent variable with initial value 0
@@ -79,7 +80,7 @@ struct Variable {
    * Gets the degree of the expression this variable represents
    * @return the type of the expression
    */
-  ExpressionType getType() const { return expr->type; }
+  Linearity getLinearity() const { return expr->linearity; }
 
   /**
    * Checks if the expression this variable represents is independent of other expressions

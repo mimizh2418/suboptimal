@@ -9,18 +9,18 @@
 #include <vector>
 
 namespace suboptimal {
-Expression::Expression(const double value, const ExpressionType type) : value{value}, type{type} {}
+Expression::Expression(const double value, const Linearity linearity) : value{value}, linearity{linearity} {}
 
-Expression::Expression(const ExpressionType type, const ValueFunc value_func, const AdjointValueFunc adjoint_value_func,
+Expression::Expression(const Linearity linearity, const ValueFunc value_func, const AdjointValueFunc adjoint_value_func,
                        const AdjointExprFunc adjoint_expr_func, const ExpressionPtr arg)  // NOLINT
     : value{value_func(arg->value, 0.0)},
       lhs{arg},
       value_func{value_func},
       lhs_adjoint_value{adjoint_value_func},
       lhs_adjoint_expr_func{adjoint_expr_func},
-      type{type} {}
+      linearity{linearity} {}
 
-Expression::Expression(const ExpressionType type, const ValueFunc valueFunc,
+Expression::Expression(const Linearity linearity, const ValueFunc valueFunc,
                        const AdjointValueFunc lhs_adjoint_value_func, const AdjointValueFunc rhs_adjoint_value_func,
                        const AdjointExprFunc lhs_adjoint_expr_func, const AdjointExprFunc rhs_adjoint_expr_func,
                        const ExpressionPtr lhs,  // NOLINT
@@ -33,7 +33,7 @@ Expression::Expression(const ExpressionType type, const ValueFunc valueFunc,
       rhs_adjoint_value_func{rhs_adjoint_value_func},
       lhs_adjoint_expr_func{lhs_adjoint_expr_func},
       rhs_adjoint_expr_func{rhs_adjoint_expr_func},
-      type{type} {}
+      linearity{linearity} {}
 
 void Expression::updateChildren() {
   children.clear();
@@ -109,7 +109,7 @@ ExpressionPtr operator-(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      x->type, [](const double val, double) { return -val; },
+      x->linearity, [](const double val, double) { return -val; },
       [](double, double, const double parent_adjoint) { return -parent_adjoint; },
       [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) { return -parent_adjoint; },
       x);
@@ -127,7 +127,7 @@ ExpressionPtr operator+(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   }
 
   return std::make_shared<Expression>(
-      std::max(lhs->type, rhs->type), [](const double lhs_val, const double rhs_val) { return lhs_val + rhs_val; },
+      std::max(lhs->linearity, rhs->linearity), [](const double lhs_val, const double rhs_val) { return lhs_val + rhs_val; },
       [](double, double, const double parent_adjoint) { return parent_adjoint; },
       [](double, double, const double parent_adjoint) { return parent_adjoint; },
       [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) { return parent_adjoint; },
@@ -147,7 +147,7 @@ ExpressionPtr operator-(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   }
 
   return std::make_shared<Expression>(
-      std::max(lhs->type, rhs->type), [](const double lhs_val, const double rhs_val) { return lhs_val - rhs_val; },
+      std::max(lhs->linearity, rhs->linearity), [](const double lhs_val, const double rhs_val) { return lhs_val - rhs_val; },
       [](double, double, const double parent_adjoint) { return parent_adjoint; },
       [](double, double, const double parent_adjoint) { return -parent_adjoint; },
       [](const ExpressionPtr&, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) { return parent_adjoint; },
@@ -169,19 +169,19 @@ ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
     return std::make_shared<Expression>(lhs->value * rhs->value);
   }
 
-  ExpressionType type;
+  Linearity linearity;
   if (lhs->isConstant()) {
-    type = rhs->type;
+    linearity = rhs->linearity;
   } else if (rhs->isConstant()) {
-    type = lhs->type;
-  } else if (lhs->type == ExpressionType::Linear && rhs->type == ExpressionType::Linear) {
-    type = ExpressionType::Quadratic;
+    linearity = lhs->linearity;
+  } else if (lhs->linearity == Linearity::Linear && rhs->linearity == Linearity::Linear) {
+    linearity = Linearity::Quadratic;
   } else {
-    type = ExpressionType::Nonlinear;
+    linearity = Linearity::Nonlinear;
   }
 
   return std::make_shared<Expression>(
-      type, [](const double lhs_val, const double rhs_val) { return lhs_val * rhs_val; },
+      linearity, [](const double lhs_val, const double rhs_val) { return lhs_val * rhs_val; },
       [](double, const double rhs_val, const double parent_adjoint) { return rhs_val * parent_adjoint; },
       [](const double lhs_val, double, const double parent_adjoint) { return lhs_val * parent_adjoint; },
       [](const ExpressionPtr&, const ExpressionPtr& rhs_expr, const ExpressionPtr& parent_adjoint) {
@@ -209,7 +209,7 @@ ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   }
 
   return std::make_shared<Expression>(
-      rhs->isConstant() ? lhs->type : ExpressionType::Nonlinear,
+      rhs->isConstant() ? lhs->linearity : Linearity::Nonlinear,
       [](const double lhs_val, const double rhs_val) { return lhs_val / rhs_val; },
       [](double, const double rhs_val, const double parent_adjoint) { return parent_adjoint / rhs_val; },
       [](const double lhs_val, const double rhs_val, const double parent_adjoint) {
@@ -233,7 +233,7 @@ ExpressionPtr abs(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::abs(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::abs(val); },
       [](const double val, double, const double parent_adjoint) { return parent_adjoint * val / std::abs(val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return parent_adjoint * expr / suboptimal::abs(expr);
@@ -250,7 +250,7 @@ ExpressionPtr sqrt(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::sqrt(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::sqrt(val); },
       [](const double val, double, const double parent_adjoint) { return parent_adjoint * 0.5 / std::sqrt(val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return parent_adjoint * std::make_shared<Expression>(0.5) / suboptimal::sqrt(expr);
@@ -267,7 +267,7 @@ ExpressionPtr exp(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::exp(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::exp(val); },
       [](const double val, double, const double parent_adjoint) { return parent_adjoint * std::exp(val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return parent_adjoint * suboptimal::exp(expr);
@@ -284,7 +284,7 @@ ExpressionPtr log(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::log(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::log(val); },
       [](const double val, double, const double parent_adjoint) { return parent_adjoint / val; },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return parent_adjoint / expr;
@@ -306,15 +306,15 @@ ExpressionPtr pow(const ExpressionPtr& base, const ExpressionPtr& exponent) {
     return std::make_shared<Expression>(std::pow(base->value, exponent->value));
   }
 
-  ExpressionType type;
-  if (base->type == ExpressionType::Linear && exponent->constEquals(2.0)) {
-    type = ExpressionType::Quadratic;
+  Linearity linearity;
+  if (base->linearity == Linearity::Linear && exponent->constEquals(2.0)) {
+    linearity = Linearity::Quadratic;
   } else {
-    type = ExpressionType::Nonlinear;
+    linearity = Linearity::Nonlinear;
   }
 
   return std::make_shared<Expression>(
-      type, [](const double base_val, const double exp_val) { return std::pow(base_val, exp_val); },
+      linearity, [](const double base_val, const double exp_val) { return std::pow(base_val, exp_val); },
       [](const double base_val, const double exp_val, const double parent_adjoint) {
         return parent_adjoint * exp_val * std::pow(base_val, exp_val - 1);
       },
@@ -342,7 +342,7 @@ ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double x_val, const double y_val) { return std::hypot(x_val, y_val); },
+      Linearity::Nonlinear, [](const double x_val, const double y_val) { return std::hypot(x_val, y_val); },
       [](const double x_val, const double y_val, const double parent_adjoint) {
         return parent_adjoint * x_val / std::hypot(x_val, y_val);
       },
@@ -367,7 +367,7 @@ ExpressionPtr sin(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::sin(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::sin(val); },
       [](const double val, double, const double parent_adjoint) { return parent_adjoint * std::cos(val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return parent_adjoint * suboptimal::cos(expr);
@@ -381,7 +381,7 @@ ExpressionPtr cos(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::cos(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::cos(val); },
       [](const double val, double, const double parent_adjoint) { return -parent_adjoint * std::sin(val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return -parent_adjoint * suboptimal::sin(expr);
@@ -398,7 +398,7 @@ ExpressionPtr tan(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::tan(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::tan(val); },
       [](const double val, double, const double parent_adjoint) {
         return parent_adjoint / (std::cos(val) * std::cos(val));
       },
@@ -417,7 +417,7 @@ ExpressionPtr asin(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::asin(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::asin(val); },
       [](const double val, double, const double parent_adjoint) { return parent_adjoint / std::sqrt(1 - val * val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return parent_adjoint / suboptimal::sqrt(std::make_shared<Expression>(1.0) - expr * expr);
@@ -431,7 +431,7 @@ ExpressionPtr acos(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::acos(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::acos(val); },
       [](const double val, double, const double parent_adjoint) { return -parent_adjoint / std::sqrt(1 - val * val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return -parent_adjoint / suboptimal::sqrt(std::make_shared<Expression>(1.0) - expr * expr);
@@ -448,7 +448,7 @@ ExpressionPtr atan(const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double val, double) { return std::atan(val); },
+      Linearity::Nonlinear, [](const double val, double) { return std::atan(val); },
       [](const double val, double, const double parent_adjoint) { return parent_adjoint / (1 + val * val); },
       [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
         return parent_adjoint / (std::make_shared<Expression>(1.0) + expr * expr);
@@ -465,7 +465,7 @@ ExpressionPtr atan2(const ExpressionPtr& y, const ExpressionPtr& x) {
   }
 
   return std::make_shared<Expression>(
-      ExpressionType::Nonlinear, [](const double y_val, const double x_val) { return std::atan2(y_val, x_val); },
+      Linearity::Nonlinear, [](const double y_val, const double x_val) { return std::atan2(y_val, x_val); },
       [](const double y_val, const double x_val, const double parent_adjoint) {
         return parent_adjoint * x_val / (y_val * y_val + x_val * x_val);
       },

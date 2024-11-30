@@ -16,11 +16,11 @@ using namespace suboptimal;
 TEST_CASE("Autodiff - Variable constructor", "[autodiff]") {
   const Variable x{1.0};
   CHECK(x.getValue() == 1.0);
-  CHECK(x.getType() == ExpressionType::Linear);
+  CHECK(x.getLinearity() == Linearity::Linear);
 
   const Variable y{};
   CHECK(y.getValue() == 0.0);
-  CHECK(y.getType() == ExpressionType::Linear);
+  CHECK(y.getLinearity() == Linearity::Linear);
 }
 
 TEST_CASE("Autodiff - Variable basic arithmetic", "[autodiff]") {

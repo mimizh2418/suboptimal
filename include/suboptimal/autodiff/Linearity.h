@@ -5,7 +5,7 @@
 #include <string>
 
 namespace suboptimal {
-enum class ExpressionType : int {
+enum class Linearity : int {
   // The expression is a constant
   Constant,
   // The expression contains linear and constant terms
@@ -16,9 +16,9 @@ enum class ExpressionType : int {
   Nonlinear
 };
 
-constexpr std::string toString(const ExpressionType& exprType) {
-  using enum ExpressionType;
-  switch (exprType) {
+constexpr std::string toString(const Linearity& linearity) {
+  using enum Linearity;
+  switch (linearity) {
     case Constant:
       return "constant";
     case Linear:
