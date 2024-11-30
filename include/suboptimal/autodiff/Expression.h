@@ -31,15 +31,13 @@ struct Expression {
 
   ValueFunc value_func = nullptr;  // Function giving the value of the expression
 
-  AdjointValueFunc lhs_adjoint_value_func = nullptr;       // Function giving the adjoint value of the LHS expression
+  AdjointValueFunc lhs_adjoint_value_func = nullptr;  // Function giving the adjoint value of the LHS expression
   AdjointValueFunc rhs_adjoint_value_func = nullptr;  // Function giving the adjoint value of the RHS expression
 
   AdjointExprFunc lhs_adjoint_expr_func = nullptr;  // Function giving the adjoint expression of the LHS expression
   AdjointExprFunc rhs_adjoint_expr_func = nullptr;  // Function giving the adjoint expression of the RHS expression
 
   Linearity linearity = Linearity::Constant;
-
-  int wrt_index = -1;
 
   int indegree = 0;
   std::vector<Expression*> children{};  // Children of this expression sorted from parent to child, excluding constants.
