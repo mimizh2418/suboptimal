@@ -10,7 +10,7 @@
 
 #include "util/assert.h"
 #include "util/comparison_util.h"
-#include "util/expression_util.h"
+#include "util/linear_expression_util.h"
 
 using namespace Eigen;
 
@@ -115,23 +115,23 @@ Index LinearProblem::numGreaterThanConstraints() const {
 }
 
 std::string LinearProblem::objectiveFunctionString() const {
-  return expressionFromCoeffs((is_minimization ? -1 : 1) * objective_coeffs, "x");
+  return linearExpressionFromCoeffs((is_minimization ? -1 : 1) * objective_coeffs, "x");
 }
 
 std::vector<std::string> LinearProblem::constraintStrings() const {
   std::vector<std::string> ret(num_constraints);
   size_t current_constraint_index = 0;
   for (size_t i = 0; i < equality_constraints.size(); i++, current_constraint_index++) {
-    ret[current_constraint_index] = expressionFromCoeffs(equality_constraints[i].head(num_decision_vars).eval(), "x");
+    ret[current_constraint_index] = linearExpressionFromCoeffs(equality_constraints[i].head(num_decision_vars).eval(), "x");
     ret[current_constraint_index] += std::format(" = {}", equality_constraints[i](num_decision_vars));
   }
   for (size_t i = 0; i < less_than_constraints.size(); i++, current_constraint_index++) {
-    ret[current_constraint_index] = expressionFromCoeffs(less_than_constraints[i].head(num_decision_vars).eval(), "x");
+    ret[current_constraint_index] = linearExpressionFromCoeffs(less_than_constraints[i].head(num_decision_vars).eval(), "x");
     ret[current_constraint_index] += std::format(" ≤ {}", less_than_constraints[i](num_decision_vars));
   }
   for (size_t i = 0; i < greater_than_constraints.size(); i++, current_constraint_index++) {
     ret[current_constraint_index] =
-        expressionFromCoeffs(greater_than_constraints[i].head(num_decision_vars).eval(), "x");
+        linearExpressionFromCoeffs(greater_than_constraints[i].head(num_decision_vars).eval(), "x");
     ret[current_constraint_index] += std::format(" ≥ {}", greater_than_constraints[i](num_decision_vars));
   }
   return ret;

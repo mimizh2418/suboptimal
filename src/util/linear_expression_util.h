@@ -7,7 +7,7 @@
 
 #include <Eigen/Core>
 
-inline std::string expressionFromCoeffs(const Eigen::Ref<const Eigen::VectorXd>& coeffs,
+inline std::string linearExpressionFromCoeffs(const Eigen::Ref<const Eigen::VectorXd>& coeffs,
                                         const std::string& variable_name) {
   std::string ret;
   bool first = true;
