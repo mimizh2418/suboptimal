@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include <string>
+#include <array>
+#include <string_view>
 
 namespace suboptimal {
-enum class SimplexPivotRule {
+enum class SimplexPivotRule : int {
   // Simplest pivot rule, practical in some cases but may cause cycling
   Dantzig,
   // Prevents cycling, but may take longer to converge
@@ -14,17 +15,8 @@ enum class SimplexPivotRule {
   Lexicographic
 };
 
-constexpr std::string toString(const SimplexPivotRule& rule) {
-  using enum SimplexPivotRule;
-  switch (rule) {
-    case Dantzig:
-      return "Dantzig";
-    case Bland:
-      return "Bland";
-    case Lexicographic:
-      return "Lexicographic";
-    default:
-      return "unknown pivot rule";
-  }
+constexpr std::string_view toString(const SimplexPivotRule& rule) {
+  constexpr std::array<std::string_view, 3> strings{"Dantzig", "Bland", "Lexicographic"};
+  return strings[static_cast<int>(rule)];
 }
 }  // namespace suboptimal

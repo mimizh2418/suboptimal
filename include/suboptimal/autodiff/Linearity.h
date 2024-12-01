@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include <string>
+#include <array>
+#include <string_view>
 
 namespace suboptimal {
 enum class Linearity : int {
@@ -16,19 +17,8 @@ enum class Linearity : int {
   Nonlinear
 };
 
-constexpr std::string toString(const Linearity& linearity) {
-  using enum Linearity;
-  switch (linearity) {
-    case Constant:
-      return "constant";
-    case Linear:
-      return "linear";
-    case Quadratic:
-      return "quadratic";
-    case Nonlinear:
-      return "nonlinear";
-    default:
-      return "unknown";
-  }
+constexpr std::string_view toString(const Linearity& linearity) {
+  constexpr std::array<std::string_view, 4> strings{"constant", "linear", "quadratic", "nonlinear"};
+  return strings[static_cast<int>(linearity)];
 }
 }  // namespace suboptimal
