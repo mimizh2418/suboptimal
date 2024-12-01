@@ -61,6 +61,16 @@ struct Expression {
              AdjointValueFunc rhs_adjoint_value_func, AdjointExprFunc lhs_adjoint_expr_func,
              AdjointExprFunc rhs_adjoint_expr_func, ExpressionPtr lhs, ExpressionPtr rhs);
 
+  Expression(const Expression& other) = delete;
+
+  Expression(Expression&& other) = default;
+
+  Expression& operator=(const Expression& other) = delete;
+
+  Expression& operator=(Expression&& other) = default;
+
+  ~Expression() = default;
+
   /**
    * Checks if the value of this expression is independent of any other expressions
    */
