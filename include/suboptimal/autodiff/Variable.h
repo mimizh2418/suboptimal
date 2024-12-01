@@ -124,8 +124,8 @@ struct Variable {
 Variable operator+(const Variable& x);
 Variable operator-(const Variable& x);
 
-template <typename LHS, typename RHS>
-  requires VariableLike<LHS> && VariableLike<RHS> && (std::same_as<LHS, Variable> || std::same_as<RHS, Variable>)
+template <VariableLike LHS, VariableLike RHS>
+  requires std::same_as<LHS, Variable> || std::same_as<RHS, Variable>
 Variable operator+(const LHS& lhs, const RHS& rhs) {
   if constexpr (std::is_arithmetic_v<LHS>) {
     return {std::make_shared<Expression>(lhs) + rhs.expr};
@@ -136,8 +136,8 @@ Variable operator+(const LHS& lhs, const RHS& rhs) {
   }
 }
 
-template <typename LHS, typename RHS>
-  requires VariableLike<LHS> && VariableLike<RHS> && (std::same_as<LHS, Variable> || std::same_as<RHS, Variable>)
+template <VariableLike LHS, VariableLike RHS>
+  requires std::same_as<LHS, Variable> || std::same_as<RHS, Variable>
 Variable operator-(const LHS& lhs, const RHS& rhs) {
   if constexpr (std::is_arithmetic_v<LHS>) {
     return {std::make_shared<Expression>(lhs) - rhs.expr};
@@ -148,8 +148,8 @@ Variable operator-(const LHS& lhs, const RHS& rhs) {
   }
 }
 
-template <typename LHS, typename RHS>
-  requires VariableLike<LHS> && VariableLike<RHS> && (std::same_as<LHS, Variable> || std::same_as<RHS, Variable>)
+template <VariableLike LHS, VariableLike RHS>
+  requires std::same_as<LHS, Variable> || std::same_as<RHS, Variable>
 Variable operator*(const LHS& lhs, const RHS& rhs) {
   if constexpr (std::is_arithmetic_v<LHS>) {
     return {std::make_shared<Expression>(lhs) * rhs.expr};
@@ -160,8 +160,8 @@ Variable operator*(const LHS& lhs, const RHS& rhs) {
   }
 }
 
-template <typename LHS, typename RHS>
-  requires VariableLike<LHS> && VariableLike<RHS> && (std::same_as<LHS, Variable> || std::same_as<RHS, Variable>)
+template <VariableLike LHS, VariableLike RHS>
+  requires std::same_as<LHS, Variable> || std::same_as<RHS, Variable>
 Variable operator/(const LHS& lhs, const RHS& rhs) {
   if constexpr (std::is_arithmetic_v<LHS>) {
     return {std::make_shared<Expression>(lhs) / rhs.expr};
@@ -177,8 +177,8 @@ Variable sqrt(const Variable& x);
 Variable exp(const Variable& x);
 Variable log(const Variable& x);
 
-template <typename Base, typename Exp>
-  requires VariableLike<Base> && VariableLike<Exp> && (std::same_as<Base, Variable> || std::same_as<Exp, Variable>)
+template <VariableLike Base, VariableLike Exp>
+  requires std::same_as<Base, Variable> || std::same_as<Exp, Variable>
 Variable pow(const Base& base, const Exp& exponent) {
   if constexpr (std::is_arithmetic_v<Base>) {
     return {pow(std::make_shared<Expression>(base), exponent.expr)};
@@ -189,8 +189,8 @@ Variable pow(const Base& base, const Exp& exponent) {
   }
 }
 
-template <typename X, typename Y>
-  requires VariableLike<X> && VariableLike<Y> && (std::same_as<X, Variable> || std::same_as<Y, Variable>)
+template <VariableLike X, VariableLike Y>
+  requires std::same_as<X, Variable> || std::same_as<Y, Variable>
 Variable hypot(const X& x, const Y& y) {
   if constexpr (std::is_arithmetic_v<X>) {
     return {hypot(std::make_shared<Expression>(x), y.expr)};
@@ -208,8 +208,8 @@ Variable asin(const Variable& x);
 Variable acos(const Variable& x);
 Variable atan(const Variable& x);
 
-template <typename Y, typename X>
-  requires VariableLike<Y> && VariableLike<X> && (std::same_as<Y, Variable> || std::same_as<X, Variable>)
+template <VariableLike Y, VariableLike X>
+  requires std::same_as<Y, Variable> || std::same_as<X, Variable>
 Variable atan2(const Y& y, const X& x) {
   if constexpr (std::is_arithmetic_v<Y>) {
     return {atan2(std::make_shared<Expression>(y), x.expr)};
