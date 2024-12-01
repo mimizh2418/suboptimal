@@ -31,7 +31,8 @@ using Matrix3v = Eigen::Matrix3<Variable>;
 using Matrix4v = Eigen::Matrix4<Variable>;
 
 /**
- * An autodiff variable. Essentially just a nicer wrapper around Expression
+ * An autodiff variable. Basically a nicer wrapper around Expression. Unlike Expression, a Variable is safe to copy and
+ * move around.
  */
 struct Variable {
   ExpressionPtr expr = std::make_shared<Expression>(0.0, Linearity::Linear);

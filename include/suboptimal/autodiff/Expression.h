@@ -63,11 +63,11 @@ struct Expression {
 
   Expression(const Expression& other) = delete;
 
-  Expression(Expression&& other) = default;
+  Expression(Expression&& other) = delete;
 
   Expression& operator=(const Expression& other) = delete;
 
-  Expression& operator=(Expression&& other) = default;
+  Expression& operator=(Expression&& other) = delete;
 
   ~Expression() = default;
 
