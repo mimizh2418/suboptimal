@@ -131,7 +131,7 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
     }
 
     profiler.startIteration();
-    auto end_profile_iter = FinalAction([&] { profiler.endIteration(); });
+    FinalAction([&] { profiler.endIteration(); });
 
     // Find pivot position
     Index pivot_row, pivot_col;
@@ -213,7 +213,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     const SolverExitStatus aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
     const bool is_feasible = isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0);
 
-    auto print_diagnostics = FinalAction([&] {
+    FinalAction([&] {
       if (!config.verbose) {
         return;
       }
@@ -243,8 +243,8 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     // Remove non-basic artificial variables from tableau
     std::vector<Index> cols_to_keep(problem.numDecisionVars() + problem.numSlackVars());
     std::iota(cols_to_keep.begin(), cols_to_keep.end(), 0);
-    for (Index i = problem.numDecisionVars() + problem.numSlackVars(); i < tableau.cols() - 1; i++) {
-      if ((basic_vars.array() == i).any()) {
+    for (const Index i : basic_vars) {
+      if (i >= problem.numDecisionVars() + problem.numSlackVars()) {
         cols_to_keep.push_back(i);
       }
     }
@@ -252,12 +252,11 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     tableau = tableau(all, cols_to_keep).eval();
     basic_vars = findBasicVars(tableau);  // Recalculate basic variables on new tableau
 
-    RowVectorXd objective_row = RowVectorXd::Zero(tableau.cols());
+    MatrixXd::RowXpr objective_row = tableau.row(tableau.rows() - 1);
     objective_row.head(problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
     for (Index i = 0; i < basic_vars.size(); i++) {
       objective_row -= tableau.row(i) * objective_row(basic_vars(i));
     }
-    tableau.row(tableau.rows() - 1) = objective_row;
   } else {
     basic_vars = findBasicVars(tableau);
   }
@@ -267,7 +266,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
   const SolverExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
 
   // TODO why is this here
-  auto print_diagnostics = FinalAction([&] {
+  FinalAction([&] {
     if (!config.verbose) {
       return;
     }

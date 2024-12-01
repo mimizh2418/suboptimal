@@ -33,9 +33,7 @@ const Eigen::SparseVector<double>& Gradient::getValue() {
 VectorXv Gradient::getExpr() {
   if (var.getLinearity() <= Linearity::Linear) {
     VectorXv grad{wrt.size()};
-    for (int i = 0; i < wrt.size(); i++) {
-      grad(i) = Variable{std::make_shared<Expression>(0.0)};
-    }
+    std::ranges::for_each(grad, [](Variable& v) { v.expr = std::make_shared<Expression>(0.0); });
     for (Eigen::SparseVector<double>::InnerIterator it(value); it; ++it) {
       grad(it.index()) = Variable{std::make_shared<Expression>(it.value())};
     }
