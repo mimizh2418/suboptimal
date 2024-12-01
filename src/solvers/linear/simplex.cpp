@@ -131,7 +131,7 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
     }
 
     profiler.startIteration();
-    FinalAction([&] { profiler.endIteration(); });
+    auto end_iter = FinalAction([&] { profiler.endIteration(); });
 
     // Find pivot position
     Index pivot_row, pivot_col;
@@ -213,7 +213,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     const SolverExitStatus aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
     const bool is_feasible = isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0);
 
-    FinalAction([&] {
+    auto print_diagnostics = FinalAction([&] {
       if (!config.verbose) {
         return;
       }
@@ -266,7 +266,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
   const SolverExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
 
   // TODO why is this here
-  FinalAction([&] {
+  auto print_diagnostics = FinalAction([&] {
     if (!config.verbose) {
       return;
     }
