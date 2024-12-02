@@ -10,12 +10,15 @@
 
 namespace suboptimal {
 Gradient::Gradient(const Variable& var, const Eigen::Ref<const VectorXv>& wrt) : var{var}, wrt{wrt}, value(wrt.size()) {
+  value.setZero();
   var.updateGraph();
 
   std::ranges::for_each(wrt, [](const Variable& v) { v.expr->adjoint = 0.0; });
   var.expr->updateAdjoints();
   for (int i = 0; i < wrt.size(); i++) {
-    value.coeffRef(i) = wrt(i).expr->adjoint;
+    if (const double adjoint = wrt(i).expr->adjoint; adjoint != 0.0) {
+      value.coeffRef(i) = adjoint;
+    }
   }
 }
 
@@ -23,10 +26,13 @@ Gradient::Gradient(const Variable& var, const std::initializer_list<Variable> wr
 
 const Eigen::SparseVector<double>& Gradient::getValue() {
   if (var.getLinearity() > Linearity::Linear) {
+    value.setZero();
     std::ranges::for_each(wrt, [](const Variable& v) { v.expr->adjoint = 0.0; });
     var.expr->updateAdjoints();
     for (int i = 0; i < wrt.size(); i++) {
-      value.coeffRef(i) = wrt(i).expr->adjoint;
+      if (const double adjoint = wrt(i).expr->adjoint; adjoint != 0.0) {
+        value.coeffRef(i) = adjoint;
+      }
     }
   }
   return value;
@@ -35,7 +41,7 @@ const Eigen::SparseVector<double>& Gradient::getValue() {
 VectorXv Gradient::getExpr() {
   if (var.getLinearity() <= Linearity::Linear) {
     VectorXv grad{wrt.size()};
-    std::ranges::for_each(grad, [](Variable& v) { v.expr = std::make_shared<Expression>(0.0); });
+    std::ranges::for_each(grad, [](Variable& v) { v = Variable::Constant(0.0); });
     for (Eigen::SparseVector<double>::InnerIterator it(value); it; ++it) {
       grad(it.index()) = Variable::Constant(it.value());
     }
