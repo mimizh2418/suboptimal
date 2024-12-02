@@ -35,7 +35,7 @@ VectorXv Gradient::getExpr() {
     VectorXv grad{wrt.size()};
     std::ranges::for_each(grad, [](Variable& v) { v.expr = std::make_shared<Expression>(0.0); });
     for (Eigen::SparseVector<double>::InnerIterator it(value); it; ++it) {
-      grad(it.index()) = Variable{std::make_shared<Expression>(it.value())};
+      grad(it.index()) = Variable::Constant(it.value());
     }
   }
 
@@ -64,7 +64,7 @@ VectorXv Gradient::getExpr() {
       grad(i) = Variable{wrt(i).expr->adjoint_expr};
     } else {
       // var is not dependent on wrt(i)
-      grad(i) = Variable{std::make_shared<Expression>(0.0)};
+      grad(i) = Variable::Constant(0.0);
     }
   }
 
