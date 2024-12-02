@@ -10,6 +10,8 @@
 
 namespace suboptimal {
 Gradient::Gradient(const Variable& var, const Eigen::Ref<const VectorXv>& wrt) : var{var}, wrt{wrt}, value(wrt.size()) {
+  var.updateGraph();
+
   std::ranges::for_each(wrt, [](const Variable& v) { v.expr->adjoint = 0.0; });
   var.expr->updateAdjoints();
   for (int i = 0; i < wrt.size(); i++) {
@@ -38,8 +40,6 @@ VectorXv Gradient::getExpr() {
       grad(it.index()) = Variable::Constant(it.value());
     }
   }
-
-  var.expr->updateChildren();
 
   // Initialize adjoint expressions
   std::ranges::for_each(var.expr->children,

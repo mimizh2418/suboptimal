@@ -67,6 +67,11 @@ struct Variable {
   static Variable Constant(double value);
 
   /**
+   * Updates the stored expression graph of the variable
+   */
+  void updateGraph() const;
+
+  /**
    * Updates the value of the variable, traversing the expression tree and updating all expressions and variables this
    * variable depends on
    */

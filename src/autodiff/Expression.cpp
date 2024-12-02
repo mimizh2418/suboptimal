@@ -85,7 +85,10 @@ void Expression::updateValue() {
     // Expression represents either a constant or an independent variable, so no update is needed
     return;
   }
-  updateChildren();
+
+  if (children.empty() && (lhs != nullptr || rhs != nullptr)) {
+    updateChildren();
+  }
 
   for (const auto expr : std::ranges::reverse_view(children)) {
     if (expr->isUnary()) {

@@ -16,6 +16,10 @@ Variable Variable::Constant(double value) {
   return std::make_shared<Expression>(value);
 }
 
+void Variable::updateGraph() const {
+  expr->updateChildren();
+}
+
 void Variable::updateValue() const {
   expr->updateValue();
 }
