@@ -15,7 +15,5 @@
     }                                                                                                          \
   } while (false)
 #else
-#define ASSERT(condition, message) \
-  do {                             \
-  } while (false)
+#define ASSERT(condition, message) static_cast<void>(0)
 #endif
