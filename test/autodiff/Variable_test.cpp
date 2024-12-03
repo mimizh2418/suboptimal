@@ -54,7 +54,7 @@ TEST_CASE("Autodiff - Variable basic arithmetic", "[autodiff]") {
   }
 }
 
-TEST_CASE("Autodiff - Variable STL functions", "[autodiff]") {
+TEST_CASE("Autodiff - Basic Variable STL functions", "[autodiff]") {
   Variable x{};
   Variable y{};
   Variable f{};
@@ -66,17 +66,16 @@ TEST_CASE("Autodiff - Variable STL functions", "[autodiff]") {
     x.setValue(x_val);
     y.setValue(y_val);
 
-    f = suboptimal::sin(x) + suboptimal::cos(y) +
-        suboptimal::atan2(x, 5) * suboptimal::sqrt(y) / (suboptimal::exp(x) + suboptimal::hypot(suboptimal::log(x), y));
+    f = suboptimal::erf(suboptimal::sqrt(suboptimal::abs(-suboptimal::pow(x, 3.0)))) / suboptimal::exp(x) +
+        suboptimal::hypot(suboptimal::log(x), y);
     const double f_val =
-        std::sin(x_val) + std::cos(y_val) +
-        std::atan2(x_val, 5) * std::sqrt(y_val) / (std::exp(x_val) + std::hypot(std::log(x_val), y_val));
+        std::erf(std::sqrt(std::abs(-std::pow(x_val, 3.0)))) / std::exp(x_val) + std::hypot(std::log(x_val), y_val);
     CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
   }
 
   SECTION("Value update") {
-    f = suboptimal::sin(x) + suboptimal::cos(y) +
-        suboptimal::atan2(x, 5) * suboptimal::sqrt(y) / (suboptimal::exp(x) + suboptimal::hypot(suboptimal::log(x), y));
+    f = suboptimal::erf(suboptimal::sqrt(suboptimal::abs(-suboptimal::pow(x, 3.0)))) / suboptimal::exp(x) +
+        suboptimal::hypot(suboptimal::log(x), y);
 
     const double x_val = GENERATE(take(5, random(0.0, 100.0)));
     const double y_val = GENERATE(take(5, random(0.0, 100.0)));
@@ -85,8 +84,123 @@ TEST_CASE("Autodiff - Variable STL functions", "[autodiff]") {
     y.setValue(y_val);
 
     const double f_val =
-        std::sin(x_val) + std::cos(y_val) +
-        std::atan2(x_val, 5) * std::sqrt(y_val) / (std::exp(x_val) + std::hypot(std::log(x_val), y_val));
+        std::erf(std::sqrt(std::abs(-std::pow(x_val, 3.0)))) / std::exp(x_val) + std::hypot(std::log(x_val), y_val);
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+}
+
+TEST_CASE("Autodiff - Variable trig functions", "[autodiff]") {
+  Variable x{};
+  Variable y{};
+  Variable f{};
+
+  SECTION("Initial value") {
+    const double x_val = GENERATE(take(5, random(0.0, 100.0)));
+    const double y_val = GENERATE(take(5, random(0.0, 100.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+
+    f = suboptimal::sin(x * y) + suboptimal::cos(x) + suboptimal::tan(y);
+    const double f_val = std::sin(x_val * y_val) + std::cos(x_val) + std::tan(y_val);
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+}
+
+TEST_CASE("Autodiff - Variable inverse trig functions", "[autodiff]") {
+  Variable x{};
+  Variable y{};
+  Variable f{};
+
+  SECTION("Initial value") {
+    const double x_val = GENERATE(take(5, random(-1.0, 1.0)));
+    const double y_val = GENERATE(take(5, random(-1.0, 1.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+
+    f = suboptimal::asin(x) + suboptimal::acos(y) + suboptimal::atan(x * y);
+    const double f_val = std::asin(x_val) + std::acos(y_val) + std::atan(x_val * y_val);
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+
+  SECTION("Value update") {
+    f = suboptimal::asin(x) + suboptimal::acos(y) + suboptimal::atan(x * y);
+
+    const double x_val = GENERATE(take(5, random(-1.0, 1.0)));
+    const double y_val = GENERATE(take(5, random(-1.0, 1.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+
+    const double f_val = std::asin(x_val) + std::acos(y_val) + std::atan(x_val * y_val);
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+}
+
+TEST_CASE("Autodiff - Variable hyperbolic trig functions", "[autodiff]") {
+  Variable x{};
+  Variable y{};
+  Variable f{};
+
+  SECTION("Initial value") {
+    const double x_val = GENERATE(take(5, random(-100.0, 100.0)));
+    const double y_val = GENERATE(take(5, random(-100.0, 100.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+
+    f = suboptimal::sinh(x) + suboptimal::cosh(y) + suboptimal::tanh(x * y);
+    const double f_val = std::sinh(x_val) + std::cosh(y_val) + std::tanh(x_val * y_val);
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+
+  SECTION("Value update") {
+    f = suboptimal::sinh(x) + suboptimal::cosh(y) + suboptimal::tanh(x * y);
+
+    const double x_val = GENERATE(take(5, random(-100.0, 100.0)));
+    const double y_val = GENERATE(take(5, random(-100.0, 100.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+
+    const double f_val = std::sinh(x_val) + std::cosh(y_val) + std::tanh(x_val * y_val);
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+}
+
+TEST_CASE("Autodiff - Variable inverse hyperbolic trig functions") {
+  Variable x{};
+  Variable y{};
+  Variable z{};
+  Variable f{};
+
+  SECTION("Initial value") {
+    const double x_val = GENERATE(take(5, random(-100.0, 100.0)));
+    const double y_val = GENERATE(take(5, random(1.0, 100.0)));
+    const double z_val = GENERATE(take(5, random(-1.0, 1.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+    z.setValue(z_val);
+
+    f = suboptimal::asinh(x) + suboptimal::acosh(y) + suboptimal::atanh(z);
+    const double f_val = std::asinh(x_val) + std::acosh(y_val) + std::atanh(z_val);
+    CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
+  }
+
+  SECTION("Value update") {
+    f = suboptimal::asinh(x) + suboptimal::acosh(y) + suboptimal::atanh(z);
+
+    const double x_val = GENERATE(take(5, random(-100.0, 100.0)));
+    const double y_val = GENERATE(take(5, random(1.0, 100.0)));
+    const double z_val = GENERATE(take(5, random(-1.0, 1.0)));
+
+    x.setValue(x_val);
+    y.setValue(y_val);
+    z.setValue(z_val);
+
+    const double f_val = std::asinh(x_val) + std::acosh(y_val) + std::atanh(z_val);
     CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));
   }
 }

@@ -133,11 +133,22 @@ ExpressionPtr log(const ExpressionPtr& x);
 ExpressionPtr pow(const ExpressionPtr& base, const ExpressionPtr& exponent);
 ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y);
 
+ExpressionPtr erf(const ExpressionPtr& x);
+
 ExpressionPtr sin(const ExpressionPtr& x);
 ExpressionPtr cos(const ExpressionPtr& x);
 ExpressionPtr tan(const ExpressionPtr& x);
+
 ExpressionPtr asin(const ExpressionPtr& x);
 ExpressionPtr acos(const ExpressionPtr& x);
 ExpressionPtr atan(const ExpressionPtr& x);
 ExpressionPtr atan2(const ExpressionPtr& y, const ExpressionPtr& x);
+
+ExpressionPtr sinh(const ExpressionPtr& x);
+ExpressionPtr cosh(const ExpressionPtr& x);
+ExpressionPtr tanh(const ExpressionPtr& x);
+
+ExpressionPtr asinh(const ExpressionPtr& x);
+ExpressionPtr acosh(const ExpressionPtr& x);
+ExpressionPtr atanh(const ExpressionPtr& x);
 }  // namespace suboptimal

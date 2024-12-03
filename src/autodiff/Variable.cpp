@@ -61,6 +61,10 @@ Variable log(const Variable& x) {
   return log(x.expr);
 }
 
+Variable erf(const Variable& x) {
+  return erf(x.expr);
+}
+
 Variable sin(const Variable& x) {
   return sin(x.expr);
 }
@@ -82,5 +86,30 @@ Variable acos(const Variable& x) {
 
 Variable atan(const Variable& x) {
   return atan(x.expr);
+}
+
+Variable sinh(const Variable& x) {
+  return sinh(x.expr);
+}
+
+Variable cosh(const Variable& x) {
+  return cosh(x.expr);
+}
+
+Variable tanh(const Variable& x) {
+  return tanh(x.expr);
+}
+
+Variable asinh(const Variable& x) {
+  return asinh(x.expr);
+}
+
+Variable acosh(const Variable& x) {
+  return acosh(x.expr);
+  
+}
+
+Variable atanh(const Variable& x) {
+  return atanh(x.expr);
 }
 }  // namespace suboptimal

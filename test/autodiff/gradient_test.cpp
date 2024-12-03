@@ -6,6 +6,7 @@
 #include <suboptimal/autodiff/derivatives.h>
 
 #include <cmath>
+#include <iostream>
 
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>
@@ -136,6 +137,18 @@ TEST_CASE("Autodiff - Gradient of hypot", "[autodiff]") {
   CHECK(suboptimal::getValues(grad.getExpr()).isApprox(grad_val));
 }
 
+TEST_CASE("Autodiff - Gradient of erf", "[autodiff]") {
+  Variable x{};
+  const Variable f = suboptimal::erf(x);
+  Gradient grad{f, {x}};
+
+  const double x_val = GENERATE(take(10, random(-100.0, 100.0)));
+  x.setValue(x_val);
+  const double grad_val = 2 * std::exp(-x_val * x_val) / std::sqrt(std::numbers::pi);
+  CHECK_THAT(grad.getValue().coeff(0), Catch::Matchers::WithinAbs(grad_val, 1e-9));
+  CHECK_THAT(suboptimal::getValues(grad.getExpr())(0), Catch::Matchers::WithinAbs(grad_val, 1e-9));
+}
+
 TEST_CASE("Autodiff - Gradients of trig functions", "[autodiff]") {
   Variable x{};
   Variable y{};
@@ -191,6 +204,48 @@ TEST_CASE("Autodiff - Gradient of atan2", "[autodiff]") {
 
   const Eigen::Vector2d grad_val{-y_val / (x_val * x_val + y_val * y_val),  //
                                  x_val / (x_val * x_val + y_val * y_val)};
+  CHECK(grad.getValue().isApprox(grad_val));
+  CHECK(suboptimal::getValues(grad.getExpr()).isApprox(grad_val));
+}
+
+TEST_CASE("Autodiff - Gradient of hyperbolic trig functions", "[autodiff]") {
+  Variable x{};
+  Variable y{};
+  Variable z{};
+  const Variable f = suboptimal::sinh(x) * suboptimal::cosh(y) * suboptimal::tanh(z);
+  Gradient grad{f, {x, y, z}};
+
+  const double x_val = GENERATE(take(5, random(-100.0, 100.0)));
+  const double y_val = GENERATE(take(5, random(-100.0, 100.0)));
+  const double z_val = GENERATE(take(5, random(-100.0, 100.0)));
+  x.setValue(x_val);
+  y.setValue(y_val);
+  z.setValue(z_val);
+
+  const Eigen::Vector3d grad_val{std::cosh(x_val) * std::cosh(y_val) * std::tanh(z_val),  //
+                                 std::sinh(x_val) * std::sinh(y_val) * std::tanh(z_val),  //
+                                 std::sinh(x_val) * std::cosh(y_val) / (std::cosh(z_val) * std::cosh(z_val))};
+  CHECK(grad.getValue().isApprox(grad_val));
+  CHECK(suboptimal::getValues(grad.getExpr()).isApprox(grad_val));
+}
+
+TEST_CASE("Autodiff - Gradient of inverse hyperbolic trig functions", "[autodiff]") {
+  Variable x{};
+  Variable y{};
+  Variable z{};
+  const Variable f = suboptimal::asinh(x) * suboptimal::acosh(y) * suboptimal::atanh(z);
+  Gradient grad{f, {x, y, z}};
+
+  const double x_val = GENERATE(take(5, random(-100.0, 100.0)));
+  const double y_val = GENERATE(take(5, random(1.0, 100.0)));
+  const double z_val = GENERATE(take(5, random(-1.0, 1.0)));
+  x.setValue(x_val);
+  y.setValue(y_val);
+  z.setValue(z_val);
+
+  const Eigen::Vector3d grad_val{std::acosh(y_val) * std::atanh(z_val) / std::sqrt(1 + x_val * x_val),
+                                 std::asinh(x_val) * std::atanh(z_val) / (std::sqrt(y_val - 1) * std::sqrt(y_val + 1)),
+                                 std::asinh(x_val) * std::acosh(y_val) / (1 - z_val * z_val)};
   CHECK(grad.getValue().isApprox(grad_val));
   CHECK(suboptimal::getValues(grad.getExpr()).isApprox(grad_val));
 }

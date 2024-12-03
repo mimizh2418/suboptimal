@@ -386,6 +386,26 @@ ExpressionPtr hypot(const ExpressionPtr& x, const ExpressionPtr& y) {
       x, y);
 }
 
+ExpressionPtr erf(const ExpressionPtr& x) {
+  if (x->constEquals(0.0)) {
+    return x;
+  }
+  if (x->isConstant()) {
+    return std::make_shared<Expression>(std::erf(x->value));
+  }
+
+  return std::make_shared<Expression>(
+      Linearity::Nonlinear, [](const double val, double) { return std::erf(val); },
+      [](const double val, double, const double parent_adjoint) {
+        return parent_adjoint * 2.0 * std::exp(-val * val) / std::sqrt(std::numbers::pi);
+      },
+      [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
+        return parent_adjoint * std::make_shared<Expression>(2.0) * suboptimal::exp(-expr * expr) /
+               std::make_shared<Expression>(std::sqrt(std::numbers::pi));
+      },
+      x);
+}
+
 ExpressionPtr sin(const ExpressionPtr& x) {
   if (x->constEquals(0.0)) {
     return x;
@@ -507,5 +527,106 @@ ExpressionPtr atan2(const ExpressionPtr& y, const ExpressionPtr& x) {
         return -parent_adjoint * y_expr / (y_expr * y_expr + x_expr * x_expr);
       },
       y, x);
+}
+
+ExpressionPtr sinh(const ExpressionPtr& x) {
+  if (x->constEquals(0.0)) {
+    return x;
+  }
+  if (x->isConstant()) {
+    return std::make_shared<Expression>(std::sinh(x->value));
+  }
+
+  return std::make_shared<Expression>(
+      Linearity::Nonlinear, [](const double val, double) { return std::sinh(val); },
+      [](const double val, double, const double parent_adjoint) { return parent_adjoint * std::cosh(val); },
+      [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
+        return parent_adjoint * suboptimal::cosh(expr);
+      },
+      x);
+}
+
+ExpressionPtr cosh(const ExpressionPtr& x) {
+  if (x->isConstant()) {
+    return std::make_shared<Expression>(std::cosh(x->value));
+  }
+
+  return std::make_shared<Expression>(
+      Linearity::Nonlinear, [](const double val, double) { return std::cosh(val); },
+      [](const double val, double, const double parent_adjoint) { return parent_adjoint * std::sinh(val); },
+      [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
+        return parent_adjoint * suboptimal::sinh(expr);
+      },
+      x);
+}
+
+ExpressionPtr tanh(const ExpressionPtr& x) {
+  if (x->constEquals(0.0)) {
+    return x;
+  }
+  if (x->isConstant()) {
+    return std::make_shared<Expression>(std::tanh(x->value));
+  }
+
+  return std::make_shared<Expression>(
+      Linearity::Nonlinear, [](const double val, double) { return std::tanh(val); },
+      [](const double val, double, const double parent_adjoint) {
+        return parent_adjoint * (1 - std::tanh(val) * std::tanh(val));
+      },
+      [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
+        return parent_adjoint * (std::make_shared<Expression>(1.0) - suboptimal::tanh(expr) * suboptimal::tanh(expr));
+      },
+      x);
+}
+
+ExpressionPtr asinh(const ExpressionPtr& x) {
+  if (x->constEquals(0.0)) {
+    return x;
+  }
+  if (x->isConstant()) {
+    return std::make_shared<Expression>(std::asinh(x->value));
+  }
+
+  return std::make_shared<Expression>(
+      Linearity::Nonlinear, [](const double val, double) { return std::asinh(val); },
+      [](const double val, double, const double parent_adjoint) { return parent_adjoint / std::sqrt(1 + val * val); },
+      [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
+        return parent_adjoint / suboptimal::sqrt(std::make_shared<Expression>(1.0) + expr * expr);
+      },
+      x);
+}
+
+ExpressionPtr acosh(const ExpressionPtr& x) {
+  if (x->isConstant()) {
+    return std::make_shared<Expression>(std::acosh(x->value));
+  }
+
+  return std::make_shared<Expression>(
+      Linearity::Nonlinear, [](const double val, double) { return std::acosh(val); },
+      [](const double val, double, const double parent_adjoint) {
+        return parent_adjoint / (std::sqrt(val - 1) * std::sqrt(val + 1));
+      },
+      [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
+        return parent_adjoint / (suboptimal::sqrt(expr - std::make_shared<Expression>(1.0)) *
+                                 suboptimal::sqrt(expr + std::make_shared<Expression>(1.0)));
+      },
+      x);
+}
+
+ExpressionPtr atanh(const ExpressionPtr& x) {
+  if (x->constEquals(0.0)) {
+    return x;
+  }
+  if (x->isConstant()) {
+    return std::make_shared<Expression>(std::atanh(x->value));
+  }
+
+  return std::make_shared<Expression>(
+      Linearity::Nonlinear, [](const double val, double) { return std::atanh(val); },
+      [](const double val, double, const double parent_adjoint) { return parent_adjoint / (1 - val * val); },
+      [](const ExpressionPtr& expr, const ExpressionPtr&, const ExpressionPtr& parent_adjoint) {
+        return parent_adjoint / (std::make_shared<Expression>(1.0) - expr * expr);
+      },
+      x);
 }
 }  // namespace suboptimal

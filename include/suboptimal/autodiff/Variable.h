@@ -213,9 +213,12 @@ Variable hypot(const X& x, const Y& y) {
   }
 }
 
+Variable erf(const Variable& x);
+
 Variable sin(const Variable& x);
 Variable cos(const Variable& x);
 Variable tan(const Variable& x);
+
 Variable asin(const Variable& x);
 Variable acos(const Variable& x);
 Variable atan(const Variable& x);
@@ -231,6 +234,14 @@ Variable atan2(const Y& y, const X& x) {
     return atan2(y.expr, x.expr);
   }
 }
+
+Variable sinh(const Variable& x);
+Variable cosh(const Variable& x);
+Variable tanh(const Variable& x);
+
+Variable asinh(const Variable& x);
+Variable acosh(const Variable& x);
+Variable atanh(const Variable& x);
 
 /**
  * Returns a matrix holding the values of the Variables in the input matrix
