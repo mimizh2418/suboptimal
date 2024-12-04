@@ -20,15 +20,15 @@ Expression::Expression(const Linearity linearity, const ValueFunc value_func, co
       lhs_adjoint_expr_func{adjoint_expr_func},
       linearity{linearity} {}
 
-Expression::Expression(const Linearity linearity, const ValueFunc valueFunc,
+Expression::Expression(const Linearity linearity, const ValueFunc value_func,
                        const AdjointValueFunc lhs_adjoint_value_func, const AdjointValueFunc rhs_adjoint_value_func,
                        const AdjointExprFunc lhs_adjoint_expr_func, const AdjointExprFunc rhs_adjoint_expr_func,
                        const ExpressionPtr lhs,  // NOLINT
                        const ExpressionPtr rhs)  // NOLINT
-    : value{valueFunc(lhs->value, rhs->value)},
+    : value{value_func(lhs->value, rhs->value)},
       lhs{lhs},
       rhs{rhs},
-      value_func{valueFunc},
+      value_func{value_func},
       lhs_adjoint_value_func{lhs_adjoint_value_func},
       rhs_adjoint_value_func{rhs_adjoint_value_func},
       lhs_adjoint_expr_func{lhs_adjoint_expr_func},

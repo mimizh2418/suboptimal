@@ -57,7 +57,7 @@ struct Expression {
   /**
    * Constructs a binary expression
    */
-  Expression(Linearity linearity, ValueFunc valueFunc, AdjointValueFunc lhs_adjoint_value_func,
+  Expression(Linearity linearity, ValueFunc value_func, AdjointValueFunc lhs_adjoint_value_func,
              AdjointValueFunc rhs_adjoint_value_func, AdjointExprFunc lhs_adjoint_expr_func,
              AdjointExprFunc rhs_adjoint_expr_func, ExpressionPtr lhs, ExpressionPtr rhs);
 
