@@ -221,10 +221,6 @@ ExpressionPtr operator*(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
       lhs, rhs);
 }
 
-ExpressionPtr func(const ExpressionPtr& x) {
-  return x;
-}
-
 ExpressionPtr operator/(const ExpressionPtr& lhs, const ExpressionPtr& rhs) {
   if (rhs->constEquals(1.0)) {
     return lhs;
