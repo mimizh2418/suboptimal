@@ -9,7 +9,7 @@
 namespace suboptimal {
 
 /**
- * Represents a nonlinear constraint in standard form (g(x) <= 0 or h(x) == 0)
+ * Represents a nonlinear constraint in standard form (c_i(x) >= 0 or c_e(x) == 0)
  */
 struct Constraint {
   Variable var;
@@ -17,32 +17,32 @@ struct Constraint {
 
   template <VariableLike LHS, VariableLike RHS>
     requires std::same_as<LHS, Variable> || std::same_as<RHS, Variable>
-  Constraint(Variable&& lhs, Variable&& rhs, int type)
-      : var{(type == 1 ? -1 : 1) * (lhs - rhs)}, is_equality{type == 0} {}
+  Constraint(Variable&& lhs, Variable&& rhs, const int type)
+      : var{(type == -1 ? -1 : 1) * (lhs - rhs)}, is_equality{type == 0} {}
 };
 
 template <VariableLike LHS, VariableLike RHS>
   requires std::same_as<LHS, Variable> || std::same_as<RHS, Variable>
 Constraint operator==(LHS&& lhs, RHS&& rhs) {
-  return Constraint{std::forward(lhs), std::forward(rhs), 0};
+  return Constraint{std::forward<LHS>(lhs), std::forward<RHS>(rhs), 0};
 }
 
 template <VariableLike LHS, VariableLike RHS>
   requires std::same_as<LHS, Variable> || std::same_as<RHS, Variable>
 Constraint operator<=(LHS&& lhs, RHS&& rhs) {
-  return Constraint{std::forward(lhs), std::forward(rhs), -1};
+  return Constraint{std::forward<LHS>(lhs), std::forward<RHS>(rhs), -1};
 }
 
 template <VariableLike LHS, VariableLike RHS>
   requires std::same_as<LHS, Variable> || std::same_as<RHS, Variable>
 Constraint operator>=(LHS&& lhs, RHS&& rhs) {
-  return Constraint{std::forward(lhs), std::forward(rhs), 1};
+  return Constraint{std::forward<LHS>(lhs), std::forward<RHS>(rhs), 1};
 }
 
 /**
  * Represents a nonlinear optimization problem in standard form:
  * min f(x),
- * s.t. g(x) <= 0, h(x) == 0
+ * s.t. c_i(x) >= 0, c_e(x) == 0
  */
 class NonlinearProblem {
  public:
@@ -95,6 +95,7 @@ class NonlinearProblem {
  private:
   Variable objective;
   std::vector<Variable> decision_vars;
-  std::vector<Constraint> constraints;
+  std::vector<Constraint> inequality_constraints;
+  std::vector<Constraint> equality_constraints;
 };
 }  // namespace suboptimal

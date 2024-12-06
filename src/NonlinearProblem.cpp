@@ -17,10 +17,18 @@ void NonlinearProblem::minimize(Variable&& objective) {
 }
 
 void NonlinearProblem::addConstraint(const Constraint& constraint) {
-  constraints.push_back(constraint);
+  if (constraint.is_equality) {
+    equality_constraints.push_back(constraint);
+  } else {
+    inequality_constraints.push_back(constraint);
+  }
 }
 
 void NonlinearProblem::addConstraint(Constraint&& constraint) {
-  constraints.push_back(std::move(constraint));
+  if (constraint.is_equality) {
+    equality_constraints.push_back(std::move(constraint));
+  } else {
+    inequality_constraints.push_back(std::move(constraint));
+  }
 }
-}
+}  // namespace suboptimal
