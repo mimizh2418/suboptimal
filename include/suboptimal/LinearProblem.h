@@ -31,9 +31,9 @@ class LinearProblem {
   Eigen::Index numSlackVars() const { return numLessThanConstraints() + numGreaterThanConstraints(); }
   Eigen::Index numArtificialVars() const { return numEqualityConstraints() + numGreaterThanConstraints(); }
 
-  Eigen::Index numEqualityConstraints() const;
-  Eigen::Index numLessThanConstraints() const;
-  Eigen::Index numGreaterThanConstraints() const;
+  Eigen::Index numEqualityConstraints() const { return static_cast<Eigen::Index>(equality_constraints.size()); }
+  Eigen::Index numLessThanConstraints() const { return static_cast<Eigen::Index>(less_than_constraints.size()); }
+  Eigen::Index numGreaterThanConstraints() const { return static_cast<Eigen::Index>(greater_than_constraints.size()); }
 
   std::string objectiveFunctionString() const;
   std::vector<std::string> constraintStrings() const;

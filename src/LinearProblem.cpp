@@ -102,18 +102,6 @@ void LinearProblem::buildConstraints(Ref<MatrixXd> constraint_matrix, Ref<Vector
   }
 }
 
-Index LinearProblem::numEqualityConstraints() const {
-  return static_cast<Index>(equality_constraints.size());
-}
-
-Index LinearProblem::numLessThanConstraints() const {
-  return static_cast<Index>(less_than_constraints.size());
-}
-
-Index LinearProblem::numGreaterThanConstraints() const {
-  return static_cast<Index>(greater_than_constraints.size());
-}
-
 std::string LinearProblem::objectiveFunctionString() const {
   return linearExpressionFromCoeffs((is_minimization ? -1 : 1) * objective_coeffs, "x");
 }
