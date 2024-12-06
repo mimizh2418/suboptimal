@@ -106,7 +106,6 @@ Variable asinh(const Variable& x) {
 
 Variable acosh(const Variable& x) {
   return acosh(x.expr);
-  
 }
 
 Variable atanh(const Variable& x) {

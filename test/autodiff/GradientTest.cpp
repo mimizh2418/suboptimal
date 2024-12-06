@@ -2,8 +2,8 @@
 
 #define CATCH_CONFIG_FAST_COMPILE
 
-#include <suboptimal/autodiff/Variable.h>
 #include <suboptimal/autodiff/Derivatives.h>
+#include <suboptimal/autodiff/Variable.h>
 
 #include <cmath>
 #include <iostream>
@@ -31,6 +31,10 @@ TEST_CASE("Autodiff - Basic gradient", "[autodiff]") {
 
   const Eigen::Vector2d grad_val{(x_val * x_val - y_val * y_val) / (5 * x_val * x_val),  //
                                  (2 * y_val - 2 * x_val) / (5 * x_val)};
+
+
+  std::cout << grad.getValue() << std::endl;
+  std::cout << grad_val << std::endl;
   CHECK(grad.getValue().isApprox(grad_val));
   CHECK(suboptimal::getValues(grad.getExpr()).isApprox(grad_val));
 }

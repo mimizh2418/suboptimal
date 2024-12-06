@@ -1,8 +1,10 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #pragma once
 
 #include <concepts>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "suboptimal/autodiff/Variable.h"
 
@@ -79,7 +81,7 @@ class NonlinearProblem {
    * @param objective the function to maximize
    */
   void maximize(Variable&& objective);
-  
+
   /**
    * Adds a constraint to the optimization problem
    * @param constraint the constraint to add

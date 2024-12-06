@@ -14,10 +14,10 @@
 #include "suboptimal/solvers/SolverExitStatus.h"
 #include "suboptimal/solvers/linear/SimplexPivotRule.h"
 #include "suboptimal/solvers/linear/SimplexSolverConfig.h"
-#include "util/FinalAction.h"
-#include "util/SolverProfiler.h"
 #include "util/Assert.h"
 #include "util/ComparisonUtil.h"
+#include "util/FinalAction.h"
+#include "util/SolverProfiler.h"
 
 using namespace Eigen;
 

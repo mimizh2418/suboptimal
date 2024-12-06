@@ -1,4 +1,8 @@
+// Copyright (c) 2024 Alvin Zhang.
+
 #include "suboptimal/NonlinearProblem.h"
+
+#include <utility>
 
 namespace suboptimal {
 NonlinearProblem::NonlinearProblem() = default;

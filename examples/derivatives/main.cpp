@@ -1,7 +1,7 @@
 // Copyright (c) 2024 Alvin Zhang.
 
-#include <suboptimal/autodiff/Variable.h>
 #include <suboptimal/autodiff/Derivatives.h>
+#include <suboptimal/autodiff/Variable.h>
 
 #include <array>
 #include <cmath>

@@ -7,8 +7,8 @@
 
 #include <Eigen/Core>
 
-#include "ElevatorMPC.h"
 #include "Dynamics.h"
+#include "ElevatorMPC.h"
 
 int main() {
   using namespace std::chrono_literals;
