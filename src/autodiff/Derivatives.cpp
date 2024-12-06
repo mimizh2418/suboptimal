@@ -1,6 +1,6 @@
 // Copyright (c) 2024 Alvin Zhang.
 
-#include "suboptimal/autodiff/derivatives.h"
+#include "suboptimal/autodiff/Derivatives.h"
 
 #include <algorithm>
 #include <memory>

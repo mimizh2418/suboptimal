@@ -3,13 +3,13 @@
 #pragma once
 
 #include <suboptimal/LinearProblem.h>
-#include <suboptimal/solvers/linear/simplex.h>
+#include <suboptimal/solvers/linear/Simplex.h>
 
 #include <tuple>
 
 #include <Eigen/Core>
 
-#include "dynamics.h"
+#include "Dynamics.h"
 
 // https://math.mit.edu/classes/18.086/2014/reports/LeiZhou.pdf
 class ElevatorMPC {

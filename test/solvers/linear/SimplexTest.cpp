@@ -6,7 +6,7 @@
 #include <suboptimal/solvers/SolverExitStatus.h>
 #include <suboptimal/solvers/linear/SimplexPivotRule.h>
 #include <suboptimal/solvers/linear/SimplexSolverConfig.h>
-#include <suboptimal/solvers/linear/simplex.h>
+#include <suboptimal/solvers/linear/Simplex.h>
 
 #include <Eigen/Core>
 #include <catch2/catch_test_macros.hpp>

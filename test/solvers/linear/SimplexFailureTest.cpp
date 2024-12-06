@@ -6,7 +6,7 @@
 #include <suboptimal/solvers/SolverExitStatus.h>
 #include <suboptimal/solvers/linear/SimplexPivotRule.h>
 #include <suboptimal/solvers/linear/SimplexSolverConfig.h>
-#include <suboptimal/solvers/linear/simplex.h>
+#include <suboptimal/solvers/linear/Simplex.h>
 
 #include <limits>
 

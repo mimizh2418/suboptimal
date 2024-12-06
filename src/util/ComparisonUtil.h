@@ -6,7 +6,7 @@
 #include <cmath>
 #include <limits>
 
-#include "util/assert.h"
+#include "util/Assert.h"
 
 constexpr double EPSILON = 1e-10;
 constexpr double ABS_THRESH = 1e-10;

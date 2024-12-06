@@ -3,7 +3,7 @@
 #define CATCH_CONFIG_FAST_COMPILE
 
 #include <suboptimal/autodiff/Variable.h>
-#include <suboptimal/autodiff/derivatives.h>
+#include <suboptimal/autodiff/Derivatives.h>
 
 #include <cmath>
 

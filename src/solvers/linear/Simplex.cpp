@@ -1,6 +1,6 @@
 // Copyright (c) 2024 Alvin Zhang.
 
-#include "suboptimal/solvers/linear/simplex.h"
+#include "suboptimal/solvers/linear/Simplex.h"
 
 #include <algorithm>
 #include <iostream>
@@ -16,8 +16,8 @@
 #include "suboptimal/solvers/linear/SimplexSolverConfig.h"
 #include "util/FinalAction.h"
 #include "util/SolverProfiler.h"
-#include "util/assert.h"
-#include "util/comparison_util.h"
+#include "util/Assert.h"
+#include "util/ComparisonUtil.h"
 
 using namespace Eigen;
 
