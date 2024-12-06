@@ -3,7 +3,7 @@
 #pragma once
 
 #include <suboptimal/LinearProblem.h>
-#include <suboptimal/solvers/linear/Simplex.h>
+#include <suboptimal/solvers/simplex/Simplex.h>
 
 #include <tuple>
 

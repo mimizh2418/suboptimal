@@ -1,6 +1,6 @@
 // Copyright (c) 2024 Alvin Zhang.
 
-#include "suboptimal/solvers/linear/Simplex.h"
+#include "suboptimal/solvers/simplex/Simplex.h"
 
 #include <algorithm>
 #include <iostream>
@@ -12,8 +12,8 @@
 
 #include "suboptimal/LinearProblem.h"
 #include "suboptimal/solvers/SolverExitStatus.h"
-#include "suboptimal/solvers/linear/SimplexPivotRule.h"
-#include "suboptimal/solvers/linear/SimplexSolverConfig.h"
+#include "suboptimal/solvers/simplex/SimplexPivotRule.h"
+#include "suboptimal/solvers/simplex/SimplexConfig.h"
 #include "util/Assert.h"
 #include "util/ComparisonUtil.h"
 #include "util/FinalAction.h"
@@ -123,7 +123,7 @@ VectorX<Index> findBasicVars(const MatrixXd& tableau) {
 }
 
 SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, SolverProfiler& profiler,
-                              const SimplexSolverConfig& config) {
+                              const SimplexConfig& config) {
   for (int i = 0; i < config.max_iterations; i++) {
     // Check for timeout
     if (profiler.totalSolveTime() >= config.timeout) {
@@ -150,7 +150,7 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
 }
 
 SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
-                              const SimplexSolverConfig& config) {
+                              const SimplexConfig& config) {
   ASSERT(solution.size() == problem.numDecisionVars(),
          "Solution vector must have the same size as the number of decision variables");
 

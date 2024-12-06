@@ -5,10 +5,10 @@
 #include <chrono>
 #include <limits>
 
-#include "suboptimal/solvers/linear/SimplexPivotRule.h"
+#include "suboptimal/solvers/simplex/SimplexPivotRule.h"
 
 namespace suboptimal {
-struct SimplexSolverConfig {
+struct SimplexConfig {
   // Enables verbose output
   bool verbose = false;
   // Maximum number of iterations before solver gives up

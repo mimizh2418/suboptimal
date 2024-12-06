@@ -6,9 +6,9 @@
 
 #include "suboptimal/LinearProblem.h"
 #include "suboptimal/solvers/SolverExitStatus.h"
-#include "suboptimal/solvers/linear/SimplexSolverConfig.h"
+#include "suboptimal/solvers/simplex/SimplexConfig.h"
 
 namespace suboptimal {
 SolverExitStatus solveSimplex(const LinearProblem& problem, Eigen::Ref<Eigen::VectorXd> solution,
-                              double& objective_value, const SimplexSolverConfig& config = SimplexSolverConfig());
+                              double& objective_value, const SimplexConfig& config = SimplexConfig());
 }  // namespace suboptimal

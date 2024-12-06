@@ -4,9 +4,9 @@
 
 #include <suboptimal/LinearProblem.h>
 #include <suboptimal/solvers/SolverExitStatus.h>
-#include <suboptimal/solvers/linear/Simplex.h>
-#include <suboptimal/solvers/linear/SimplexPivotRule.h>
-#include <suboptimal/solvers/linear/SimplexSolverConfig.h>
+#include <suboptimal/solvers/simplex/Simplex.h>
+#include <suboptimal/solvers/simplex/SimplexPivotRule.h>
+#include <suboptimal/solvers/simplex/SimplexConfig.h>
 
 #include <limits>
 
