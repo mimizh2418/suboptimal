@@ -32,7 +32,6 @@ TEST_CASE("Autodiff - Basic gradient", "[autodiff]") {
   const Eigen::Vector2d grad_val{(x_val * x_val - y_val * y_val) / (5 * x_val * x_val),  //
                                  (2 * y_val - 2 * x_val) / (5 * x_val)};
 
-
   std::cout << grad.getValue() << std::endl;
   std::cout << grad_val << std::endl;
   CHECK(grad.getValue().isApprox(grad_val));

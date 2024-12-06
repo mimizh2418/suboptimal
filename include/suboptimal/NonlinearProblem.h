@@ -3,6 +3,7 @@
 #pragma once
 
 #include <concepts>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -93,6 +94,21 @@ class NonlinearProblem {
    * @param constraint the constraint to add
    */
   void addConstraint(Constraint&& constraint);
+
+  /**
+   * Returns the decision variables in the problem
+   */
+  std::span<Variable> getDecisionVariables() { return decision_vars; }
+
+  /**
+   * Returns the inequality constraints in the problem
+   */
+  std::span<Constraint> getInequalityConstraints() { return inequality_constraints; }
+
+  /**
+   * Returns the equality constraints in the problem
+   */
+  std::span<Constraint> getEqualityConstraints() { return equality_constraints; }
 
  private:
   Variable objective;
