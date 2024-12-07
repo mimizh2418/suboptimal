@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -10,14 +11,16 @@
 namespace suboptimal {
 class LinearProblem {
  public:
-  static LinearProblem maximizationProblem(const Eigen::Ref<const Eigen::VectorXd>& objective_coeffs);
-  static LinearProblem minimizationProblem(const Eigen::Ref<const Eigen::VectorXd>& objective_coeffs);
+  LinearProblem() = default;
+
+  void maximize(const Eigen::Ref<const Eigen::VectorXd>& objective_coeffs);
+  void minimize(const Eigen::Ref<const Eigen::VectorXd>& objective_coeffs);
 
   void addLessThanConstraint(const Eigen::Ref<const Eigen::VectorXd>& constraint_coeffs, double rhs);
   void addGreaterThanConstraint(const Eigen::Ref<const Eigen::VectorXd>& constraint_coeffs, double rhs);
   void addEqualityConstraint(const Eigen::Ref<const Eigen::VectorXd>& constraint_coeffs, double rhs);
 
-  const Eigen::VectorXd& getObjectiveCoeffs() const { return objective_coeffs; }
+  const std::optional<Eigen::VectorXd>& getObjectiveCoeffs() const { return objective_coeffs; }
 
   bool isMinimization() const { return is_minimization; }
 
@@ -39,19 +42,17 @@ class LinearProblem {
   std::vector<std::string> constraintStrings() const;
 
  private:
-  explicit LinearProblem(const Eigen::Ref<const Eigen::VectorXd>& objective_coeffs, bool is_minimization);
-
   void addConstraintImpl(const Eigen::Ref<const Eigen::VectorXd>& constraint_coeffs, double rhs, int constraint_type);
 
-  bool is_minimization;
+  bool is_minimization = false;
 
-  Eigen::VectorXd objective_coeffs;
+  std::optional<Eigen::VectorXd> objective_coeffs = std::nullopt;
 
   std::vector<Eigen::VectorXd> equality_constraints;
   std::vector<Eigen::VectorXd> less_than_constraints;
   std::vector<Eigen::VectorXd> greater_than_constraints;
 
-  Eigen::Index num_decision_vars;
+  Eigen::Index num_decision_vars = 0;
   Eigen::Index num_constraints = 0;
 };
 }  // namespace suboptimal

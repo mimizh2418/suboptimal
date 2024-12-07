@@ -32,7 +32,8 @@ class ElevatorMPC {
       objective(Eigen::seqN(ts * vars_per_ts, num_states)) = weights;
       objective(Eigen::seqN(ts * vars_per_ts + num_states, num_states)) = weights;
     }
-    auto problem = suboptimal::LinearProblem::minimizationProblem(objective);
+    suboptimal::LinearProblem problem{};
+    problem.minimize(objective);
 
     for (int ts = 0; ts < N; ts++) {
       const Eigen::Index x_pos_idx = ts * vars_per_ts;

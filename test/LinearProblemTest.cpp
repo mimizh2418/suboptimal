@@ -11,10 +11,11 @@ using namespace suboptimal;
 using namespace Eigen;
 
 TEST_CASE("LinearProblem - Problem initialization") {
-  auto problem = LinearProblem::maximizationProblem(Vector2d{{3, 2}});
+  LinearProblem problem{};
   problem.addLessThanConstraint(Vector2d{{2, 1}}, 50);
   problem.addGreaterThanConstraint(Vector2d{{1, 3}}, 15);
   problem.addEqualityConstraint(Vector2d{{5, 6}}, 60);
+  problem.maximize(Vector2d{{3, 2}});
 
   CHECK(problem.numConstraints() == 3);
   CHECK(problem.numDecisionVars() == 2);

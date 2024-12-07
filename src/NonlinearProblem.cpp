@@ -5,8 +5,6 @@
 #include <utility>
 
 namespace suboptimal {
-NonlinearProblem::NonlinearProblem() = default;
-
 Variable& NonlinearProblem::decisionVariable() {
   decision_vars.emplace_back();
   return decision_vars.back();

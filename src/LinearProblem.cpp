@@ -15,20 +15,34 @@
 using namespace Eigen;
 
 namespace suboptimal {
-LinearProblem::LinearProblem(const Ref<const VectorXd>& objective_coeffs, const bool is_minimization)
-    : is_minimization{is_minimization},
-      objective_coeffs{(is_minimization ? -1 : 1) * objective_coeffs},
-      num_decision_vars{objective_coeffs.size()} {
-  ASSERT(objective_coeffs.size() > 0, "Objective function must have at least one coefficient");
+void LinearProblem::maximize(const Ref<const VectorXd>& objective_coeffs) {
+  if (num_decision_vars > 0) {
+    ASSERT(objective_coeffs.size() == num_decision_vars,
+           "Objective coefficients must have the same size as the number of decision variables");
+  } else {
+    ASSERT(objective_coeffs.size() > 0, "Objective function must have at least one coefficient");
+    num_decision_vars = objective_coeffs.size();
+  }
+
+  is_minimization = false;
+  this->objective_coeffs = std::make_optional<VectorXd>(objective_coeffs);
+  num_decision_vars = objective_coeffs.size();
 }
 
-LinearProblem LinearProblem::maximizationProblem(const Ref<const VectorXd>& objective_coeffs) {
-  return LinearProblem(objective_coeffs, false);
+void LinearProblem::minimize(const Ref<const VectorXd>& objective_coeffs) {
+  if (num_decision_vars > 0) {
+    ASSERT(objective_coeffs.size() == num_decision_vars,
+           "Objective coefficients must have the same size as the number of decision variables");
+  } else {
+    ASSERT(objective_coeffs.size() > 0, "Objective function must have at least one coefficient");
+    num_decision_vars = objective_coeffs.size();
+  }
+
+  is_minimization = true;
+  this->objective_coeffs = std::make_optional<VectorXd>(-objective_coeffs);
+  num_decision_vars = objective_coeffs.size();
 }
 
-LinearProblem LinearProblem::minimizationProblem(const Ref<const VectorXd>& objective_coeffs) {
-  return LinearProblem(objective_coeffs, true);
-}
 
 void LinearProblem::addLessThanConstraint(const Ref<const VectorXd>& constraint_coeffs, const double rhs) {
   addConstraintImpl(constraint_coeffs, rhs, -1);
@@ -44,8 +58,13 @@ void LinearProblem::addEqualityConstraint(const Ref<const VectorXd>& constraint_
 
 void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coeffs, const double rhs,
                                       const int constraint_type) {
-  ASSERT(constraint_coeffs.size() == num_decision_vars,
-         "Constraint coefficients must have the same size as the number of decision variables");
+  if (num_constraints == 0) {
+    ASSERT(constraint_coeffs.size() > 0, "Constraint coefficients must have at least one coefficient");
+    num_decision_vars = constraint_coeffs.size();
+  } else {
+    ASSERT(constraint_coeffs.size() == num_decision_vars,
+           "Constraint coefficients must have the same size as the number of decision variables");
+  }
 
   VectorXd coeffs = constraint_coeffs;
   double new_rhs = rhs;
@@ -103,7 +122,10 @@ void LinearProblem::buildConstraints(Ref<MatrixXd> constraint_matrix, Ref<Vector
 }
 
 std::string LinearProblem::objectiveFunctionString() const {
-  return linearExpressionFromCoeffs((is_minimization ? -1 : 1) * objective_coeffs, "x");
+  if (!objective_coeffs.has_value()) {
+    return "";
+  }
+  return linearExpressionFromCoeffs((is_minimization ? -1 : 1) * objective_coeffs.value(), "x");
 }
 
 std::vector<std::string> LinearProblem::constraintStrings() const {

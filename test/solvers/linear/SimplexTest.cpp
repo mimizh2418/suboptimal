@@ -23,9 +23,10 @@ TEST_CASE("Simplex - Basic 1-phase maximization problem", "[simplex]") {
 
   const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
-  auto problem = LinearProblem::maximizationProblem(Vector2d{{40, 30}});
+  LinearProblem problem{};
   problem.addLessThanConstraint(Vector2d{{1, 1}}, 12);
   problem.addLessThanConstraint(Vector2d{{2, 1}}, 16);
+  problem.maximize(Vector2d{{40, 30}});
   REQUIRE(problem.numSlackVars() == 2);
   REQUIRE(problem.numArtificialVars() == 0);
 
@@ -47,9 +48,10 @@ TEST_CASE("Simplex - Basic 1-phase minimization problem", "[simplex]") {
 
   const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
-  auto problem = LinearProblem::minimizationProblem(Vector3d{{-2, -3, -4}});
+  LinearProblem problem{};
   problem.addLessThanConstraint(Vector3d{{3, 2, 1}}, 10);
   problem.addLessThanConstraint(Vector3d{{2, 5, 3}}, 15);
+  problem.minimize(Vector3d{{-2, -3, -4}});
   REQUIRE(problem.numSlackVars() == 2);
   REQUIRE(problem.numArtificialVars() == 0);
 
@@ -71,10 +73,11 @@ TEST_CASE("Simplex - Degenerate 1-phase problem", "[simplex]") {
 
   const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland);
 
-  auto problem = LinearProblem::maximizationProblem(Vector4d{{10, -57, -9, -24}});
+  LinearProblem problem{};
   problem.addLessThanConstraint(Vector4d{{0.5, -5.5, -2.5, 9}}, 0);
   problem.addLessThanConstraint(Vector4d{{0.5, -1.5, -0.5, 1}}, 0);
   problem.addLessThanConstraint(Vector4d{{1, 1, 1, 1}}, 1);
+  problem.maximize(Vector4d{{10, -57, -9, -24}});
   REQUIRE(problem.numSlackVars() == 3);
   REQUIRE(problem.numArtificialVars() == 0);
 
@@ -96,9 +99,10 @@ TEST_CASE("Simplex - Basic 2-phase problem", "[simplex]") {
 
   const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland, SimplexPivotRule::Dantzig);
 
-  auto problem = LinearProblem::minimizationProblem(Vector3d{{-2, -3, -4}});
+  LinearProblem problem{};
   problem.addEqualityConstraint(Vector3d{{3, 2, 1}}, 10);
   problem.addEqualityConstraint(Vector3d{{2, 5, 3}}, 15);
+  problem.minimize(Vector3d{{-2, -3, -4}});
   REQUIRE(problem.numSlackVars() == 0);
   REQUIRE(problem.numArtificialVars() == 2);
 
@@ -120,11 +124,12 @@ TEST_CASE("Simplex - Degenerate 2-phase problem", "[simplex]") {
 
   const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Bland);
 
-  auto problem = LinearProblem::minimizationProblem(Vector4d{{2, 6, 1, 1}});
+  LinearProblem problem{};
   problem.addEqualityConstraint(Vector4d{{1, 2, 0, 1}}, 6);
   problem.addEqualityConstraint(Vector4d{{1, 2, 1, 1}}, 7);
   problem.addEqualityConstraint(Vector4d{{1, 3, -1, 2}}, 7);
   problem.addEqualityConstraint(Vector4d{{1, 1, 1, 0}}, 5);
+  problem.minimize(Vector4d{{2, 6, 1, 1}});
   REQUIRE(problem.numSlackVars() == 0);
   REQUIRE(problem.numArtificialVars() == 4);
 

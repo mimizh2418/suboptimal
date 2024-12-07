@@ -19,10 +19,11 @@ using namespace Eigen;
 using namespace suboptimal;
 
 TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
-  auto problem = LinearProblem::maximizationProblem(Vector4d{{10, -57, -9, -24}});
+  LinearProblem problem{};
   problem.addLessThanConstraint(Vector4d{{0.5, -5.5, -2.5, 9}}, 0);
   problem.addLessThanConstraint(Vector4d{{0.5, -1.5, -0.5, 1}}, 0);
   problem.addLessThanConstraint(Vector4d{{1, 1, 1, 1}}, 1);
+  problem.maximize(Vector4d{{10, -57, -9, -24}});
   REQUIRE(problem.numSlackVars() == 3);
   REQUIRE(problem.numArtificialVars() == 0);
 
@@ -48,10 +49,11 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
 TEST_CASE("Simplex failure mode - Unbounded problem", "[simplex]") {
   const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Dantzig, SimplexPivotRule::Bland);
 
-  auto problem = LinearProblem::maximizationProblem(Vector3d{{0, 2, 1}});
+  LinearProblem problem{};
   problem.addLessThanConstraint(Vector3d{{1, -1, 1}}, 5);
   problem.addLessThanConstraint(Vector3d{{-2, 1, 0}}, 3);
   problem.addLessThanConstraint(Vector3d{{0, 1, -2}}, 5);
+  problem.maximize(Vector3d{{0, 2, 1}});
   REQUIRE(problem.numSlackVars() == 3);
   REQUIRE(problem.numArtificialVars() == 0);
 
@@ -65,10 +67,11 @@ TEST_CASE("Simplex failure mode - Unbounded problem", "[simplex]") {
 TEST_CASE("Simplex failure mode - Infeasible problem", "[simplex]") {
   const auto pivot_rule = GENERATE(SimplexPivotRule::Lexicographic, SimplexPivotRule::Dantzig, SimplexPivotRule::Bland);
 
-  auto problem = LinearProblem::maximizationProblem(Vector3d{{1, -1, 1}});
+  LinearProblem problem{};
   problem.addLessThanConstraint(Vector3d{{2, -1, -2}}, 4);
   problem.addGreaterThanConstraint(Vector3d{{-2, 3, 1}}, 5);
   problem.addGreaterThanConstraint(Vector3d{{1, -1, -1}}, 1);
+  problem.maximize(Vector3d{{1, -1, 1}});
   REQUIRE(problem.numSlackVars() == 3);
   REQUIRE(problem.numArtificialVars() == 2);
 

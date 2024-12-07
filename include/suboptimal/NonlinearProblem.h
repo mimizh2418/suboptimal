@@ -52,7 +52,7 @@ class NonlinearProblem {
   /**
    * Creates a nonlinear optimization problem
    */
-  NonlinearProblem();
+  NonlinearProblem() = default;
 
   /**
    * Adds a decision variable to the problem

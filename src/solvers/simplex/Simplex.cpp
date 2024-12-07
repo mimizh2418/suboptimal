@@ -154,13 +154,14 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
   ASSERT(solution.size() == problem.numDecisionVars(),
          "Solution vector must have the same size as the number of decision variables");
 
-  Index num_vars = problem.numDecisionVars() + problem.numSlackVars() + problem.numArtificialVars();
+  const Index num_vars = problem.numDecisionVars() + problem.numSlackVars() + problem.numArtificialVars();
+  const VectorXd objective_coeffs = problem.getObjectiveCoeffs().value_or(VectorXd::Zero(problem.numDecisionVars()));
 
   // Initialize tableau
   MatrixXd tableau = MatrixXd::Zero(problem.numConstraints() + 1, num_vars + 1);
   problem.buildConstraints(tableau.topLeftCorner(problem.numConstraints(), num_vars),
                            tableau.topRightCorner(problem.numConstraints(), 1));
-  tableau.bottomLeftCorner(1, problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
+  tableau.bottomLeftCorner(1, problem.numDecisionVars()) = -objective_coeffs.transpose();
 
   if (config.verbose) {
     std::cout << "Solving linear problem \n"
@@ -253,7 +254,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     basic_vars = findBasicVars(tableau);  // Recalculate basic variables on new tableau
 
     MatrixXd::RowXpr objective_row = tableau.row(tableau.rows() - 1);
-    objective_row.head(problem.numDecisionVars()) = -problem.getObjectiveCoeffs().transpose();
+    objective_row.head(problem.numDecisionVars()) = -objective_coeffs.transpose();
     for (Index i = 0; i < basic_vars.size(); i++) {
       objective_row -= tableau.row(i) * objective_row(basic_vars(i));
     }
