@@ -32,7 +32,7 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
   const Block objective_row = tableau.row(tableau.rows() - 1).head(tableau.cols() - 1);
   if (pivot_rule == SimplexPivotRule::Bland) {
     // Bland's rule: select the index of the first negative coefficient in the objective row
-    const auto it = std::ranges::find_if(objective_row, [](const double coeff) { return approxLT<double>(coeff, 0); });
+    const auto it = std::ranges::find_if(objective_row, [](const double coeff) { return approxLT(coeff, 0.0); });
     if (it != objective_row.end()) {
       pivot_col = it - objective_row.begin();
     }
@@ -40,7 +40,7 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
     // Dantzig's or lexicographic rule: select the index of the most negative coefficient in the objective row
     Index smallest_idx;
     const double smallest_coeff = objective_row.minCoeff(&smallest_idx);
-    if (approxLT<double>(smallest_coeff, 0)) {
+    if (approxLT(smallest_coeff, 0.0)) {
       pivot_col = smallest_idx;
     }
   }
@@ -57,25 +57,25 @@ int findPivotPosition(const MatrixXd& tableau, const VectorX<Index>& basic_vars,
   for (Index i = 0; i < tableau.rows() - 1; i++) {
     const double ratio = rhs_coeffs(i) / pivot_col_coeffs(i);
     // Pivot element cannot be 0 and ratio cannot be negative
-    if (approxLEQ<double>(tableau(i, pivot_col), 0) || approxLT<double>(ratio, 0)) {
+    if (approxLEQ(pivot_col_coeffs(i), 0.0) || approxLT(ratio, 0.0)) {
       continue;
     }
     // Minimum ratio test
-    if (approxLT<double>(ratio, min_ratio)) {
+    if (approxLT(ratio, min_ratio)) {
       min_ratio = ratio;
       pivot_row = i;
       continue;
     }
     // Dantzig does not have tie-breaking between equal ratios
-    if (!isApprox<double>(ratio, min_ratio) || pivot_rule == SimplexPivotRule::Dantzig) {
+    if (!isApprox(ratio, min_ratio) || pivot_rule == SimplexPivotRule::Dantzig) {
       continue;
     }
     if (pivot_rule == SimplexPivotRule::Lexicographic) {
       // Lexicographic rule: select the variable with the lexicographically smallest row
-      const RowVectorXd row_candidate = tableau.row(i) / tableau(i, pivot_col);
-      const RowVectorXd current_best_row = tableau.row(pivot_row) / tableau(pivot_row, pivot_col);
+      const RowVectorXd row_candidate = tableau.row(i) / pivot_col_coeffs(i);
+      const RowVectorXd current_best_row = tableau.row(pivot_row) / pivot_col_coeffs(pivot_row);
       if (std::ranges::lexicographical_compare(row_candidate, current_best_row,
-                                               [](const double a, const double b) { return approxLT<double>(a, b); })) {
+                                               [](const double a, const double b) { return approxLT(a, b); })) {
         pivot_row = i;
       }
     } else {
@@ -100,7 +100,7 @@ void pivot(MatrixXd& tableau, VectorX<Index>& basic_vars, const Index pivot_row,
   tableau.row(pivot_row) /= pivot_element;
   tableau(pivot_row, pivot_col) = 1;  // Account for floating point errors
   for (Index i = 0; i < tableau.rows(); i++) {
-    if (i == pivot_row || isApprox<double>(tableau(i, pivot_col), 0)) {
+    if (i == pivot_row || isApprox(tableau(i, pivot_col), 0.0)) {
       continue;
     }
     tableau.row(i) -= tableau(i, pivot_col) * tableau.row(pivot_row);
@@ -115,7 +115,7 @@ VectorX<Index> findBasicVars(const MatrixXd& tableau) {
   for (Index i = 0; i < tableau.cols(); i++) {
     const MatrixXd::ConstColXpr col = tableau.col(i);
     Index max_index;
-    if (isApprox<double>(col.lpNorm<1>(), 1) && isApprox<double>(col.maxCoeff(&max_index), 1)) {
+    if (isApprox(col.lpNorm<1>(), 1.0) && isApprox(col.maxCoeff(&max_index), 1.0)) {
       basic_vars(max_index) = i;
     }
   }
@@ -212,7 +212,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     // Perform simplex iterations to find initial BFS
     SolverProfiler aux_profiler{};
     const SolverExitStatus aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
-    const bool is_feasible = isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0);
+    const bool is_feasible = isApprox(tableau(tableau.rows() - 1, tableau.cols() - 1), 0.0);
 
     auto print_diagnostics = FinalAction([&] {
       if (!config.verbose) {
@@ -237,7 +237,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
       return aux_exit;
     }
 
-    if (!isApprox<double>(tableau(tableau.rows() - 1, tableau.cols() - 1), 0)) {
+    if (!isApprox(tableau(tableau.rows() - 1, tableau.cols() - 1), 0.0)) {
       return SolverExitStatus::Infeasible;
     }
 

@@ -69,7 +69,7 @@ void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coef
   VectorXd coeffs = constraint_coeffs;
   double new_rhs = rhs;
   int type = constraint_type;
-  if (approxLT<double>(rhs, 0)) {
+  if (approxLT(rhs, 0.0)) {
     coeffs = -constraint_coeffs;
     new_rhs = -rhs;
     type = -constraint_type;
