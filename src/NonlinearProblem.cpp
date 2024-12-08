@@ -5,7 +5,7 @@
 #include <utility>
 
 namespace suboptimal {
-Variable& NonlinearProblem::decisionVariable() {
+Variable& NonlinearProblem::makeDecisionVariable() {
   decision_vars.emplace_back();
   return decision_vars.back();
 }
@@ -20,17 +20,17 @@ void NonlinearProblem::minimize(Variable&& objective) {
 
 void NonlinearProblem::addConstraint(const Constraint& constraint) {
   if (constraint.is_equality) {
-    equality_constraints.push_back(constraint);
+    equality_constraints.push_back(constraint.var);
   } else {
-    inequality_constraints.push_back(constraint);
+    inequality_constraints.push_back(constraint.var);
   }
 }
 
 void NonlinearProblem::addConstraint(Constraint&& constraint) {
   if (constraint.is_equality) {
-    equality_constraints.push_back(std::move(constraint));
+    equality_constraints.push_back(std::move(constraint.var));
   } else {
-    inequality_constraints.push_back(std::move(constraint));
+    inequality_constraints.push_back(std::move(constraint.var));
   }
 }
 }  // namespace suboptimal

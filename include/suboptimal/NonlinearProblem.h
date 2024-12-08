@@ -57,7 +57,7 @@ class NonlinearProblem {
   /**
    * Adds a decision variable to the problem
    */
-  Variable& decisionVariable();
+  Variable& makeDecisionVariable();
 
   /**
    * Sets the objective function to be minimized
@@ -96,24 +96,29 @@ class NonlinearProblem {
   void addConstraint(Constraint&& constraint);
 
   /**
+   * Returns the objective function in the problem
+   */
+  const Variable& objectiveFunction() const { return objective; }
+
+  /**
    * Returns the decision variables in the problem
    */
-  std::span<Variable> getDecisionVariables() { return decision_vars; }
+  std::span<Variable> decisionVariables() { return decision_vars; }
 
   /**
    * Returns the inequality constraints in the problem
    */
-  std::span<Constraint> getInequalityConstraints() { return inequality_constraints; }
+  std::span<Variable> inequalityConstraints() { return inequality_constraints; }
 
   /**
    * Returns the equality constraints in the problem
    */
-  std::span<Constraint> getEqualityConstraints() { return equality_constraints; }
+  std::span<Variable> equalityConstraints() { return equality_constraints; }
 
  private:
   Variable objective;
   std::vector<Variable> decision_vars;
-  std::vector<Constraint> inequality_constraints;
-  std::vector<Constraint> equality_constraints;
+  std::vector<Variable> inequality_constraints;
+  std::vector<Variable> equality_constraints;
 };
 }  // namespace suboptimal
