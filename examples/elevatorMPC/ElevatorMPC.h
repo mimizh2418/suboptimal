@@ -21,8 +21,8 @@ class ElevatorMPC {
         dynamics(dynamics),
         weights(weights) {}
 
-  std::tuple<double, suboptimal::SolverExitStatus> calculate(const Eigen::Vector2d& state,
-                                                             const Eigen::Vector2d& reference) const {
+  std::tuple<double, suboptimal::SimplexExitStatus> calculate(const Eigen::Vector2d& state,
+                                                              const Eigen::Vector2d& reference) const {
     // e = |x_i - r_i| = x+_i - x-_i
     // w_i|x_i - r_i| = (w_i)(x+_i) + (w_i)(x-_i)
     // u' = u - u_min

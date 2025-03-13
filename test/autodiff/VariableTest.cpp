@@ -213,10 +213,11 @@ TEST_CASE("Autodiff - Eigen Variable support", "[autodiff]") {
                                 {7, 8}};
     const Eigen::Matrix2d f_val = x_val * y_val;
 
-    const Matrix2v x{{Variable{1}, Variable{2}},  //
-                     {Variable{3}, Variable{4}}};
-    const Matrix2v y{{Variable{5}, Variable{6}},  //
-                     {Variable{7}, Variable{8}}};
+    Matrix2v x;
+    Matrix2v y;
+    setValues(x, x_val);
+    setValues(y, y_val);
+
     const Matrix2v f = x * y;
     CHECK(suboptimal::getValues(f).isApprox(f_val));
     CHECK(suboptimal::getValuesSparse(f).isApprox(f_val));
@@ -227,8 +228,10 @@ TEST_CASE("Autodiff - Eigen Variable support", "[autodiff]") {
     const Eigen::Vector4d y_val{5, 6, 7, 8};
     const double f_val = x_val.dot(y_val);
 
-    const Vector4v x{Variable{1}, Variable{2}, Variable{3}, Variable{4}};
-    const Vector4v y{Variable{5}, Variable{6}, Variable{7}, Variable{8}};
+    Vector4v x;
+    Vector4v y;
+    setValues(x, x_val);
+    setValues(y, y_val);
     const Variable f = x.dot(y);
 
     CHECK_THAT(f.getValue(), Catch::Matchers::WithinAbs(f_val, 1e-9));

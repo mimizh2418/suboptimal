@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "InteriorPointConfig.h"
 #include "suboptimal/NonlinearProblem.h"
-#include "suboptimal/solvers/SolverExitStatus.h"
+#include "suboptimal/solvers/interiorpoint/InteriorPointConfig.h"
+#include "suboptimal/solvers/interiorpoint/InteriorPointExitStatus.h"
 
 namespace suboptimal {
-SolverExitStatus solveInteriorPoint(NonlinearProblem& problem, const InteriorPointConfig& config);
+InteriorPointExitStatus solveInteriorPoint(NonlinearProblem& problem, const InteriorPointConfig& config = {});
 }  // namespace suboptimal

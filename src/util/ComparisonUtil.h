@@ -6,7 +6,7 @@
 #include <cmath>
 #include <limits>
 
-#include "util/Assert.h"
+#include "suboptimal/util/Assert.h"
 
 constexpr double EPSILON = 1e-10;
 constexpr double ABS_THRESH = 1e-10;
@@ -16,9 +16,9 @@ concept ComparableFloat = std::is_floating_point_v<T>;
 
 template <ComparableFloat T>
 bool isApprox(T a, T b, T epsilon = EPSILON, T abs_thresh = ABS_THRESH) {
-  ASSERT(epsilon >= std::numeric_limits<T>::epsilon() && epsilon <= 1,
-         "epsilon must be in [std::numeric_limits<T>::epsilon(), 1]");
-  ASSERT(abs_thresh >= 0, "abs_thresh must be non-negative");
+  SUBOPTIMAL_ASSERT(epsilon >= std::numeric_limits<T>::epsilon() && epsilon <= 1,
+                    "epsilon must be in [std::numeric_limits<T>::epsilon(), 1]");
+  SUBOPTIMAL_ASSERT(abs_thresh >= 0, "abs_thresh must be non-negative");
 
   if (a == b) {
     return true;

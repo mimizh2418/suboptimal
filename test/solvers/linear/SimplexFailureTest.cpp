@@ -3,9 +3,9 @@
 #define CATCH_CONFIG_FAST_COMPILE
 
 #include <suboptimal/LinearProblem.h>
-#include <suboptimal/solvers/SolverExitStatus.h>
 #include <suboptimal/solvers/simplex/Simplex.h>
 #include <suboptimal/solvers/simplex/SimplexConfig.h>
+#include <suboptimal/solvers/simplex/SimplexExitStatus.h>
 #include <suboptimal/solvers/simplex/SimplexPivotRule.h>
 
 #include <limits>
@@ -33,7 +33,7 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
   SECTION("Max iterations exceeded") {
     auto status =
         solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = SimplexPivotRule::Dantzig});
-    REQUIRE(status == SolverExitStatus::MaxIterationsExceeded);
+    REQUIRE(status == SimplexExitStatus::MaxIterationsExceeded);
   }
 
   SECTION("Timeout") {
@@ -42,7 +42,7 @@ TEST_CASE("Simplex failure mode - Degenerate cycling", "[simplex]") {
                                 .max_iterations = std::numeric_limits<int>::max(),
                                 .timeout = std::chrono::duration<double, std::milli>{100},
                                 .pivot_rule = SimplexPivotRule::Dantzig});
-    REQUIRE(status == SolverExitStatus::Timeout);
+    REQUIRE(status == SimplexExitStatus::Timeout);
   }
 }
 
@@ -61,7 +61,7 @@ TEST_CASE("Simplex failure mode - Unbounded problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
-  REQUIRE(status == SolverExitStatus::Unbounded);
+  REQUIRE(status == SimplexExitStatus::Unbounded);
 }
 
 TEST_CASE("Simplex failure mode - Infeasible problem", "[simplex]") {
@@ -79,5 +79,5 @@ TEST_CASE("Simplex failure mode - Infeasible problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
-  REQUIRE(status == SolverExitStatus::Infeasible);
+  REQUIRE(status == SimplexExitStatus::Infeasible);
 }

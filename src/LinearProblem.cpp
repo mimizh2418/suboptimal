@@ -8,7 +8,7 @@
 
 #include <Eigen/Core>
 
-#include "util/Assert.h"
+#include "suboptimal/util/Assert.h"
 #include "util/ComparisonUtil.h"
 #include "util/LinearExpressionUtil.h"
 
@@ -17,10 +17,10 @@ using namespace Eigen;
 namespace suboptimal {
 void LinearProblem::maximize(const Ref<const VectorXd>& objective_coeffs) {
   if (num_decision_vars > 0) {
-    ASSERT(objective_coeffs.size() == num_decision_vars,
-           "Objective coefficients must have the same size as the number of decision variables");
+    SUBOPTIMAL_ASSERT(objective_coeffs.size() == num_decision_vars,
+                      "Objective coefficients must have the same size as the number of decision variables");
   } else {
-    ASSERT(objective_coeffs.size() > 0, "Objective function must have at least one coefficient");
+    SUBOPTIMAL_ASSERT(objective_coeffs.size() > 0, "Objective function must have at least one coefficient");
     num_decision_vars = objective_coeffs.size();
   }
 
@@ -31,10 +31,10 @@ void LinearProblem::maximize(const Ref<const VectorXd>& objective_coeffs) {
 
 void LinearProblem::minimize(const Ref<const VectorXd>& objective_coeffs) {
   if (num_decision_vars > 0) {
-    ASSERT(objective_coeffs.size() == num_decision_vars,
-           "Objective coefficients must have the same size as the number of decision variables");
+    SUBOPTIMAL_ASSERT(objective_coeffs.size() == num_decision_vars,
+                      "Objective coefficients must have the same size as the number of decision variables");
   } else {
-    ASSERT(objective_coeffs.size() > 0, "Objective function must have at least one coefficient");
+    SUBOPTIMAL_ASSERT(objective_coeffs.size() > 0, "Objective function must have at least one coefficient");
     num_decision_vars = objective_coeffs.size();
   }
 
@@ -42,7 +42,6 @@ void LinearProblem::minimize(const Ref<const VectorXd>& objective_coeffs) {
   this->objective_coeffs = std::make_optional<VectorXd>(-objective_coeffs);
   num_decision_vars = objective_coeffs.size();
 }
-
 
 void LinearProblem::addLessThanConstraint(const Ref<const VectorXd>& constraint_coeffs, const double rhs) {
   addConstraintImpl(constraint_coeffs, rhs, -1);
@@ -59,11 +58,11 @@ void LinearProblem::addEqualityConstraint(const Ref<const VectorXd>& constraint_
 void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coeffs, const double rhs,
                                       const int constraint_type) {
   if (num_constraints == 0) {
-    ASSERT(constraint_coeffs.size() > 0, "Constraint coefficients must have at least one coefficient");
+    SUBOPTIMAL_ASSERT(constraint_coeffs.size() > 0, "Constraint coefficients must have at least one coefficient");
     num_decision_vars = constraint_coeffs.size();
   } else {
-    ASSERT(constraint_coeffs.size() == num_decision_vars,
-           "Constraint coefficients must have the same size as the number of decision variables");
+    SUBOPTIMAL_ASSERT(constraint_coeffs.size() == num_decision_vars,
+                      "Constraint coefficients must have the same size as the number of decision variables");
   }
 
   VectorXd coeffs = constraint_coeffs;
@@ -86,12 +85,13 @@ void LinearProblem::addConstraintImpl(const Ref<const VectorXd>& constraint_coef
 }
 
 void LinearProblem::buildConstraints(Ref<MatrixXd> constraint_matrix, Ref<VectorXd> constraint_rhs) const {
-  ASSERT(constraint_matrix.rows() == num_constraints &&
-             constraint_matrix.cols() == num_decision_vars + numSlackVars() + numArtificialVars(),
-         "Constraint matrix must have rows equal to the number of constraints and columns equal to the number of "
-         "decision variables plus slack and artificial variables");
-  ASSERT(constraint_rhs.rows() == num_constraints,
-         "Constraint RHS vector must be the same size as the number of constraints");
+  SUBOPTIMAL_ASSERT(
+      constraint_matrix.rows() == num_constraints &&
+          constraint_matrix.cols() == num_decision_vars + numSlackVars() + numArtificialVars(),
+      "Constraint matrix must have rows equal to the number of constraints and columns equal to the number of "
+      "decision variables plus slack and artificial variables");
+  SUBOPTIMAL_ASSERT(constraint_rhs.rows() == num_constraints,
+                    "Constraint RHS vector must be the same size as the number of constraints");
 
   constraint_matrix = MatrixXd::Zero(num_constraints, num_decision_vars + numSlackVars() + numArtificialVars());
   constraint_rhs = VectorXd::Zero(num_constraints);

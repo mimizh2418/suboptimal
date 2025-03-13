@@ -11,10 +11,10 @@
 #include <Eigen/Core>
 
 #include "suboptimal/LinearProblem.h"
-#include "suboptimal/solvers/SolverExitStatus.h"
 #include "suboptimal/solvers/simplex/SimplexConfig.h"
+#include "suboptimal/solvers/simplex/SimplexExitStatus.h"
 #include "suboptimal/solvers/simplex/SimplexPivotRule.h"
-#include "util/Assert.h"
+#include "suboptimal/util/Assert.h"
 #include "util/ComparisonUtil.h"
 #include "util/FinalAction.h"
 #include "util/SolverProfiler.h"
@@ -122,12 +122,12 @@ VectorX<Index> findBasicVars(const MatrixXd& tableau) {
   return basic_vars;
 }
 
-SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, SolverProfiler& profiler,
-                              const SimplexConfig& config) {
+SimplexExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, SolverProfiler& profiler,
+                               const SimplexConfig& config) {
   for (int i = 0; i < config.max_iterations; i++) {
     // Check for timeout
     if (profiler.totalSolveTime() >= config.timeout) {
-      return SolverExitStatus::Timeout;
+      return SimplexExitStatus::Timeout;
     }
 
     profiler.startIteration();
@@ -137,22 +137,22 @@ SolverExitStatus solveTableau(MatrixXd& tableau, VectorX<Index>& basic_vars, Sol
     Index pivot_row, pivot_col;
     const int pivot_status = findPivotPosition(tableau, basic_vars, config.pivot_rule, pivot_row, pivot_col);
     if (pivot_status == -1) {
-      return SolverExitStatus::Unbounded;  // Could not find a valid pivot position, problem is unbounded
+      return SimplexExitStatus::Unbounded;  // Could not find a valid pivot position, problem is unbounded
     }
     if (pivot_status == 1) {
-      return SolverExitStatus::Success;  // Optimal solution found
+      return SimplexExitStatus::Success;  // Optimal solution found
     }
     // Perform pivot operation
     pivot(tableau, basic_vars, pivot_row, pivot_col);
   }
 
-  return SolverExitStatus::MaxIterationsExceeded;
+  return SimplexExitStatus::MaxIterationsExceeded;
 }
 
-SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
-                              const SimplexConfig& config) {
-  ASSERT(solution.size() == problem.numDecisionVars(),
-         "Solution vector must have the same size as the number of decision variables");
+SimplexExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, double& objective_value,
+                               const SimplexConfig& config) {
+  SUBOPTIMAL_ASSERT(solution.size() == problem.numDecisionVars(),
+                    "Solution vector must have the same size as the number of decision variables");
 
   const Index num_vars = problem.numDecisionVars() + problem.numSlackVars() + problem.numArtificialVars();
   const VectorXd objective_coeffs = problem.getObjectiveCoeffs().value_or(VectorXd::Zero(problem.numDecisionVars()));
@@ -176,8 +176,8 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
   }
 
   if (problem.numConstraints() == 0) {
-    std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::Unbounded) << std::endl;
-    return SolverExitStatus::Unbounded;
+    std::cout << "Solver failed to find a solution: " << toString(SimplexExitStatus::Unbounded) << std::endl;
+    return SimplexExitStatus::Unbounded;
   }
 
   VectorX<Index> basic_vars;
@@ -211,7 +211,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
 
     // Perform simplex iterations to find initial BFS
     SolverProfiler aux_profiler{};
-    const SolverExitStatus aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
+    const SimplexExitStatus aux_exit = solveTableau(tableau, basic_vars, aux_profiler, config);
     const bool is_feasible = isApprox(tableau(tableau.rows() - 1, tableau.cols() - 1), 0.0);
 
     auto print_diagnostics = FinalAction([&] {
@@ -225,20 +225,20 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
                                aux_profiler.avgIterationTime().count())
                 << "\n";
 
-      if (aux_exit != SolverExitStatus::Success) {
+      if (aux_exit != SimplexExitStatus::Success) {
         std::cout << "Solving auxiliary LP failed: " << toString(aux_exit) << "\n";
       } else if (!is_feasible) {
-        std::cout << "Solver failed to find a solution: " << toString(SolverExitStatus::Infeasible) << "\n";
+        std::cout << "Solver failed to find a solution: " << toString(SimplexExitStatus::Infeasible) << "\n";
       }
       std::cout << std::endl;
     });
 
-    if (aux_exit != SolverExitStatus::Success) {
+    if (aux_exit != SimplexExitStatus::Success) {
       return aux_exit;
     }
 
     if (!isApprox(tableau(tableau.rows() - 1, tableau.cols() - 1), 0.0)) {
-      return SolverExitStatus::Infeasible;
+      return SimplexExitStatus::Infeasible;
     }
 
     // Remove non-basic artificial variables from tableau
@@ -264,7 +264,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
 
   // Perform simplex iterations
   SolverProfiler profiler{};
-  const SolverExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
+  const SimplexExitStatus exit_status = solveTableau(tableau, basic_vars, profiler, config);
 
   // TODO why is this here
   auto print_diagnostics = FinalAction([&] {
@@ -277,7 +277,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
                              profiler.numIterations(), profiler.avgIterationTime().count())
               << "\n";
 
-    if (exit_status != SolverExitStatus::Success) {
+    if (exit_status != SimplexExitStatus::Success) {
       std::cout << "Solver failed to find a solution: " << toString(exit_status) << "\n" << std::endl;
       return;
     }
@@ -289,7 +289,7 @@ SolverExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> soluti
     std::cout << "Objective value: " << objective_value << "\n" << std::endl;
   });
 
-  if (exit_status != SolverExitStatus::Success) {
+  if (exit_status != SimplexExitStatus::Success) {
     return exit_status;
   }
 

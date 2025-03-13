@@ -122,8 +122,7 @@ void Expression::updateAdjoints() {
   }
 }
 
-// operator overloading boilerplate :skull:
-// TODO operator null checks
+// operator overloading boilerplate
 
 ExpressionPtr operator+(const ExpressionPtr& x) {
   return x;

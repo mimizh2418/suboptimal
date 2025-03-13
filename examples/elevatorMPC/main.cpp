@@ -1,6 +1,6 @@
 // Copyright (c) 2024 Alvin Zhang.
 
-#include <suboptimal/solvers/SolverExitStatus.h>
+#include <suboptimal/solvers/simplex/SimplexExitStatus.h>
 
 #include <chrono>
 #include <iostream>
@@ -21,8 +21,8 @@ int main() {
   constexpr double stall_current_A = 304.0;
   constexpr double free_current_A = 1.5;
   constexpr double free_speed_radPerS = 636.6961104;
-  const MotorConstants motor_constants{nominal_voltage, stall_torque_Nm, stall_current_A, free_speed_radPerS,
-                                       free_current_A};
+  constexpr MotorConstants motor_constants{nominal_voltage, stall_torque_Nm, stall_current_A, free_speed_radPerS,
+                                           free_current_A};
 
   // Elevator characteristics
   constexpr double carriage_mass_kg = 15.0;
@@ -43,7 +43,7 @@ int main() {
 
   while (!((state - reference).cwiseAbs().array() < 1e-2).all()) {
     auto [voltage, status] = controller.calculate(state, reference);
-    if (status != suboptimal::SolverExitStatus::Success) {
+    if (status != suboptimal::SimplexExitStatus::Success) {
       std::cout << "Solver failed with status: " << suboptimal::toString(status) << std::endl;
       break;
     }

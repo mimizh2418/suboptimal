@@ -8,8 +8,8 @@
 #include <Eigen/Core>
 
 struct MotorConstants {
-  MotorConstants(const double nominal_voltage, const double stall_torque_Nm, const double stall_current_A,
-                 const double free_speed_radPerS, const double free_current_A)
+  constexpr MotorConstants(const double nominal_voltage, const double stall_torque_Nm, const double stall_current_A,
+                           const double free_speed_radPerS, const double free_current_A)
       : nominal_voltage(nominal_voltage),
         stall_torque_Nm(stall_torque_Nm),
         stall_current_A(stall_current_A),

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <suboptimal/util/Assert.h>
+
 #include <concepts>
 #include <memory>
 #include <type_traits>
@@ -281,8 +283,35 @@ Eigen::SparseMatrix<double> getValuesSparse(const Eigen::MatrixBase<Derived>& va
       triplets.emplace_back(i, j, value);
     }
   }
+
   result.setFromTriplets(triplets.begin(), triplets.end());
   return result;
+}
+
+template <typename DestDerived, typename SrcDerived>
+  requires std::same_as<typename DestDerived::Scalar, Variable> && std::is_arithmetic_v<typename SrcDerived::Scalar>
+void setValues(Eigen::MatrixBase<DestDerived>& dest_mat, const Eigen::MatrixBase<SrcDerived>& src_mat) {
+  SUBOPTIMAL_ASSERT(dest_mat.rows() == src_mat.rows() && dest_mat.cols() == src_mat.cols(),
+                    "Destination and source matrices must have the same dimensions");
+
+  for (Eigen::Index i = 0; i < dest_mat.rows(); i++) {
+    for (Eigen::Index j = 0; j < dest_mat.cols(); j++) {
+      dest_mat(i, j).setValue(src_mat(i, j));
+    }
+  }
+}
+
+template <typename DestDerived, typename SrcScalar>
+  requires std::same_as<typename DestDerived::Scalar, Variable> && std::is_arithmetic_v<SrcScalar>
+void setValues(Eigen::MatrixBase<DestDerived>& dest_mat, const Eigen::SparseMatrix<SrcScalar>& src_mat) {
+  SUBOPTIMAL_ASSERT(dest_mat.rows() == src_mat.rows() && dest_mat.cols() == src_mat.cols(),
+                    "Destination and source matrices must have the same dimensions");
+
+  for (Eigen::Index i = 0; i < src_mat.outerSize(); i++) {
+    for (typename Eigen::SparseMatrix<SrcScalar>::InnerIterator it(src_mat, i); it; ++it) {
+      dest_mat(it.row(), it.col()) = it.value();
+    }
+  }
 }
 }  // namespace suboptimal
 

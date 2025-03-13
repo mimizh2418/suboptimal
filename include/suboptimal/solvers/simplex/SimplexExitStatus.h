@@ -3,10 +3,10 @@
 #pragma once
 
 #include <array>
-#include <string>
+#include <string_view>
 
 namespace suboptimal {
-enum class SolverExitStatus : int {
+enum class SimplexExitStatus : int {
   // The solver found an optimal solution
   Success,
   // The solver determined the problem to be infeasible and stopped
@@ -19,7 +19,7 @@ enum class SolverExitStatus : int {
   Timeout
 };
 
-constexpr std::string_view toString(const SolverExitStatus& status) {
+constexpr std::string_view toString(const SimplexExitStatus& status) {
   constexpr std::array<std::string_view, 5> strings{
       "solver found an optimal solution", "problem is infeasible", "problem is unbounded",
       "solver exceeded the maximum number of iterations", "solver exceeded the maximum elapsed time"};

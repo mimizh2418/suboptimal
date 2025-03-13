@@ -18,6 +18,14 @@ void NonlinearProblem::minimize(Variable&& objective) {
   this->objective = std::move(objective);
 }
 
+void NonlinearProblem::maximize(const Variable& objective) {
+  this->objective = -objective;
+}
+
+void NonlinearProblem::maximize(Variable&& objective) {
+  this->objective = -std::move(objective);
+}
+
 void NonlinearProblem::addConstraint(const Constraint& constraint) {
   if (constraint.is_equality) {
     equality_constraints.push_back(constraint.var);
