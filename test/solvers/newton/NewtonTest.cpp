@@ -18,7 +18,7 @@ TEST_CASE("Newton - Single-variable", "[newton]") {
   const double expected_x = std::pow(2, 1.0 / 3.0);
 
   NonlinearProblem problem{};
-  const auto x = problem.makeDecisionVariable();
+  const Variable x = problem.makeDecisionVariable();
   problem.minimize(0.05 * suboptimal::pow(x, 4) - 0.4 * x + 1);
   ExitStatus status = solveNewton(problem);
 

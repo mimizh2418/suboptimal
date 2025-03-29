@@ -22,9 +22,11 @@ enum class ExitStatus : int {
 };
 
 constexpr std::string_view toString(const ExitStatus& status) {
-  constexpr std::array<std::string_view, 5> strings{
-      "solver found an optimal solution", "problem is infeasible", "problem is unbounded",
-      "solver exceeded the maximum number of iterations", "solver exceeded the maximum elapsed time"};
+  constexpr std::array<std::string_view, 6> strings{"solver found an optimal solution", "problem is infeasible",
+                                                    "problem is unbounded",
+                                                    "solver detected diverging iterates and stopped"
+                                                    "solver exceeded the maximum number of iterations",
+                                                    "solver exceeded the maximum elapsed time"};
   return strings[static_cast<int>(status)];
 }
 }  // namespace suboptimal
