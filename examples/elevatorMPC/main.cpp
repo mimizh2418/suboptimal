@@ -1,6 +1,6 @@
 // Copyright (c) 2024 Alvin Zhang.
 
-#include <suboptimal/solvers/simplex/SimplexExitStatus.h>
+#include <suboptimal/solvers/ExitStatus.h>
 
 #include <chrono>
 #include <iostream>
@@ -43,7 +43,7 @@ int main() {
 
   while (!((state - reference).cwiseAbs().array() < 1e-2).all()) {
     auto [voltage, status] = controller.calculate(state, reference);
-    if (status != suboptimal::SimplexExitStatus::Success) {
+    if (status != suboptimal::ExitStatus::Success) {
       std::cout << "Solver failed with status: " << suboptimal::toString(status) << std::endl;
       break;
     }

@@ -106,14 +106,47 @@ class NonlinearProblem {
   std::span<Variable> decisionVariables() { return decision_vars; }
 
   /**
+   * Returns the decision variables in the problem as a vector
+   */
+  VectorXv decisionVariableVec() {
+    VectorXv vec(decision_vars.size());
+    for (size_t i = 0; i < decision_vars.size(); i++) {
+      vec(i) = decision_vars[i];
+    }
+    return vec;
+  }
+
+  /**
    * Returns the inequality constraints in the problem
    */
   std::span<Variable> inequalityConstraints() { return inequality_constraints; }
 
   /**
+   * Returns the inequality constraints in the problem as a vector
+   */
+  VectorXv inequalityConstraintVec() {
+    VectorXv vec(inequality_constraints.size());
+    for (size_t i = 0; i < inequality_constraints.size(); i++) {
+      vec(i) = inequality_constraints[i];
+    }
+    return vec;
+  }
+
+  /**
    * Returns the equality constraints in the problem
    */
   std::span<Variable> equalityConstraints() { return equality_constraints; }
+
+  /**
+   * Returns the equality constraints in the problem as a vector
+   */
+  VectorXv equalityConstraintVec() {
+    VectorXv vec(equality_constraints.size());
+    for (size_t i = 0; i < equality_constraints.size(); i++) {
+      vec(i) = equality_constraints[i];
+    }
+    return vec;
+  }
 
  private:
   Variable objective;

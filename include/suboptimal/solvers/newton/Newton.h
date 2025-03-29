@@ -4,8 +4,9 @@
 
 #include "suboptimal/NonlinearProblem.h"
 #include "suboptimal/solvers/ExitStatus.h"
-#include "suboptimal/solvers/interiorpoint/InteriorPointConfig.h"
+#include "suboptimal/solvers/newton/NewtonConfig.h"
 
 namespace suboptimal {
-ExitStatus solveInteriorPoint(NonlinearProblem& problem, const InteriorPointConfig& config = {});
+ExitStatus solveNewton(NonlinearProblem& problem, const NewtonConfig& config = {});
+
 }  // namespace suboptimal

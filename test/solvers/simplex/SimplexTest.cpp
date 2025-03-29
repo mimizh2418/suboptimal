@@ -3,9 +3,9 @@
 #define CATCH_CONFIG_FAST_COMPILE
 
 #include <suboptimal/LinearProblem.h>
+#include <suboptimal/solvers/ExitStatus.h>
 #include <suboptimal/solvers/simplex/Simplex.h>
 #include <suboptimal/solvers/simplex/SimplexConfig.h>
-#include <suboptimal/solvers/simplex/SimplexExitStatus.h>
 #include <suboptimal/solvers/simplex/SimplexPivotRule.h>
 
 #include <Eigen/Core>
@@ -34,7 +34,7 @@ TEST_CASE("Simplex - Basic 1-phase maximization problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
-  REQUIRE(status == SimplexExitStatus::Success);
+  REQUIRE(status == ExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
@@ -59,7 +59,7 @@ TEST_CASE("Simplex - Basic 1-phase minimization problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
-  REQUIRE(status == SimplexExitStatus::Success);
+  REQUIRE(status == ExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
@@ -85,7 +85,7 @@ TEST_CASE("Simplex - Degenerate 1-phase problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
-  REQUIRE(status == SimplexExitStatus::Success);
+  REQUIRE(status == ExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
@@ -110,7 +110,7 @@ TEST_CASE("Simplex - Basic 2-phase problem", "[simplex]") {
   double objective_value;
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
   // Verify solution
-  REQUIRE(status == SimplexExitStatus::Success);
+  REQUIRE(status == ExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
@@ -138,7 +138,7 @@ TEST_CASE("Simplex - Degenerate 2-phase problem", "[simplex]") {
   auto status = solveSimplex(problem, solution, objective_value, {.verbose = true, .pivot_rule = pivot_rule});
 
   // Verify solution
-  REQUIRE(status == SimplexExitStatus::Success);
+  REQUIRE(status == ExitStatus::Success);
   CHECK_THAT(objective_value, Catch::Matchers::WithinAbs(expected_objective, 1e-9));
   CHECK(solution.size() == expected_solution.size());
   for (Index i = 0; i < solution.size(); i++) {
