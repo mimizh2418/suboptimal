@@ -39,8 +39,8 @@ ExitStatus solveNewton(NonlinearProblem& problem, const NewtonConfig& config) {
   auto exit_status = ExitStatus::MaxIterationsExceeded;
 
   if (config.verbose) {
-    std::cout << std::format("{:^10}{:^10}{:^10}{:^10}\n", "Iteration", "Cost", "||∇f||", "Time (ms)")
-              << std::format("{:=<43}", "") << std::endl;
+    std::cout << std::format("{:^4} {:^11} {:^11} {:^10}\n", "Iter", "Cost", "||∇f||", "Time (ms)")
+              << std::format("{:=<39}", "") << std::endl;
   }
 
   FinalAction print_diagnostics{[&] {
@@ -79,7 +79,7 @@ ExitStatus solveNewton(NonlinearProblem& problem, const NewtonConfig& config) {
       profiler.endIteration();
 
       if (config.verbose) {
-        std::cout << std::format("{:^10}{:^10.4f}{:^10.4f}{:^10.4f}\n", iterations, f.getValue(), error,
+        std::cout << std::format("{:^4} {:^11.3e} {:^11.3e} {:^10.4f}\n", iterations, f.getValue(), error,
                                  profiler.lastIterationTime().count());
       }
     }};
