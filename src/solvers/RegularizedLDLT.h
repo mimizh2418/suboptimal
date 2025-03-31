@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include <Eigen/Core>
 #include <Eigen/Cholesky>
+#include <Eigen/Core>
 #include <Eigen/Sparse>
 
 struct Inertia {
@@ -39,7 +39,7 @@ class RegularizedLDLT {
   Eigen::ComputationInfo info() const { return computation_info; }
 
   RegularizedLDLT& compute(const Eigen::SparseMatrix<double>& lhs) {
-    is_sparse = lhs.nonZeros() < 0.25 * lhs.size(); // TODO check sparsity threshold
+    is_sparse = lhs.nonZeros() < 0.25 * lhs.size();  // TODO check sparsity threshold
     computation_info = is_sparse ? computeSparse(lhs).info() : dense_solver.compute(lhs).info();
 
     Inertia inertia;

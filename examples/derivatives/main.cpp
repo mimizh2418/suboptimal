@@ -6,7 +6,7 @@
 #include <array>
 #include <cmath>
 #include <format>
-#include <iostream>
+#include <print>
 
 int main() {
   suboptimal::Variable x{};
@@ -22,22 +22,20 @@ int main() {
     x_vals[i] = min + i * step;
   }
 
-  std::cout << std::format("Differentiating y = 1 / (1 + e^(-x)), on x ∈ [{}, {}]\n", min, max) << std::endl;
+  std::println("Differentiating y = 1 / (1 + e^(-x)), on x ∈ [{}, {}]\n", min, max);
+  std::println("{:^10}|{:^10}|{:^20}|{:^20}\n{:=<63}", "x", "y", "dy/dx (manual)", "dy/dx (autodiff)", "");
 
-  std::cout << std::format("{:^10}|{:^10}|{:^20}|{:^20}\n", "x", "y", "dy/dx (manual)", "dy/dx (autodiff)")
-            << std::format("{:=<63}", "") << std::endl;
   for (double x_val : x_vals) {
     x.setValue(x_val);
     double dydx_manual = std::exp(-x_val) / std::pow(1.0 + std::exp(-x_val), 2);
     double dydx_ad = dydx.getValue();
-    std::cout << std::format("{:^10.4f}|{:^10.4f}|{:^20.4f}|{:^20.4f}", x_val, y.getValue(), dydx_manual, dydx_ad)
-              << std::endl;
+    std::println("{:^10.4f}|{:^10.4f}|{:^20.4f}|{:^20.4f}", x_val, y.getValue(), dydx_manual, dydx_ad);
 
     if (std::abs(dydx_manual - dydx_ad) > 1e-9) {
-      std::cerr << std::format(
+      std::println(
           "Error: autodiff result is incorrect\n "
           "Manual: {}\n "
-          "Autodiff: {}\n",
+          "Autodiff: {}",
           dydx_manual, dydx_ad);
       return 1;
     }

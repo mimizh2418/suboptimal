@@ -4,15 +4,15 @@
 
 #include <util/FinalAction.h>
 
-#include <iostream>
 #include <limits>
+#include <print>
 
 #include <Eigen/Core>
 #include <Eigen/SparseCholesky>
 
+#include "solvers/RegularizedLDLT.h"
 #include "suboptimal/autodiff/Derivatives.h"
 #include "suboptimal/autodiff/Variable.h"
-#include "solvers/RegularizedLDLT.h"
 #include "util/SolverProfiler.h"
 
 using namespace Eigen;
@@ -39,8 +39,7 @@ ExitStatus solveNewton(NonlinearProblem& problem, const NewtonConfig& config) {
   auto exit_status = ExitStatus::MaxIterationsExceeded;
 
   if (config.verbose) {
-    std::cout << std::format("{:^4} {:^11} {:^11} {:^10}\n", "Iter", "Cost", "||∇f||", "Time (ms)")
-              << std::format("{:=<39}", "") << std::endl;
+    std::println("{:^6} {:^11} {:^11} {:^10}\n{:=<41}", "Iter", "Cost", "||∇f||", "Time (ms)", "");
   }
 
   FinalAction print_diagnostics{[&] {
@@ -49,23 +48,8 @@ ExitStatus solveNewton(NonlinearProblem& problem, const NewtonConfig& config) {
     }
 
     const auto total_time = profiler.totalSolveTime();
-    std::cout << "\n"
-              << std::format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
-                             profiler.numIterations(), profiler.avgIterationTime().count())
-              << std::endl;
-    std::cout << "Exit status: " << toString(exit_status) << std::endl;
-
-    if (exit_status == ExitStatus::Success) {
-      std::cout << "Solution: [";
-      for (int i = 0; i < x.size(); i++) {
-        std::cout << x(i);
-        if (i < x.size() - 1) {
-          std::cout << ", ";
-        }
-      }
-      std::cout << "]" << std::endl;
-    }
-    std::cout << std::endl;
+    std::println("\nSolve time: {:.3f} ms ({} iterations; {:.3f} ms average)\nExit status: {}\n", total_time.count(),
+                 profiler.numIterations(), profiler.avgIterationTime().count(), toString(exit_status));
   }};
 
   for (int iterations = 0; iterations < config.max_iterations; iterations++) {
@@ -79,8 +63,8 @@ ExitStatus solveNewton(NonlinearProblem& problem, const NewtonConfig& config) {
       profiler.endIteration();
 
       if (config.verbose) {
-        std::cout << std::format("{:^4} {:^11.3e} {:^11.3e} {:^10.4f}\n", iterations, f.getValue(), error,
-                                 profiler.lastIterationTime().count());
+        std::println("{:^6} {:^11.3e} {:^11.3e} {:^10.4f}", iterations, f.getValue(), error,
+                     profiler.lastIterationTime().count());
       }
     }};
 

@@ -3,7 +3,7 @@
 #include <suboptimal/solvers/ExitStatus.h>
 
 #include <chrono>
-#include <iostream>
+#include <print>
 
 #include <Eigen/Core>
 
@@ -44,12 +44,12 @@ int main() {
   while (!((state - reference).cwiseAbs().array() < 1e-2).all()) {
     auto [voltage, status] = controller.calculate(state, reference);
     if (status != suboptimal::ExitStatus::Success) {
-      std::cout << "Solver failed with status: " << suboptimal::toString(status) << std::endl;
+      std::println("Solver failed with status: {}", suboptimal::toString(status));
       break;
     }
 
     state = elevator_dynamics.simulateTimestep(state, voltage);
-    std::cout << "Position: " << state(0) << "; Velocity: " << state(1) << "; Voltage: " << voltage << std::endl;
+    std::println("Position: {}; Velocity: {}; Voltage: {}", state(0), state(1), voltage);
   }
 
   return 0;

@@ -8,5 +8,4 @@
 
 namespace suboptimal {
 ExitStatus solveNewton(NonlinearProblem& problem, const NewtonConfig& config = {});
-
 }  // namespace suboptimal

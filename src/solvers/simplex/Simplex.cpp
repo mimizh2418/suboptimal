@@ -3,9 +3,9 @@
 #include "suboptimal/solvers/simplex/Simplex.h"
 
 #include <algorithm>
-#include <iostream>
 #include <limits>
 #include <numeric>
+#include <print>
 #include <vector>
 
 #include <Eigen/Core>
@@ -164,26 +164,29 @@ ExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, do
   tableau.bottomLeftCorner(1, problem.numDecisionVars()) = -objective_coeffs.transpose();
 
   if (config.verbose) {
-    std::cout << "Solving linear problem \n"
-              << (problem.isMinimization() ? "Minimize: " : "Maximize: ") << problem.objectiveFunctionString() << "\n"
-              << "Subject to: " << "\n";
+    std::println(
+        "Solving linear problem\n"
+        "{}: {}\n"
+        "Subject to:",
+        problem.isMinimization() ? "Minimize" : "Maximize", problem.objectiveFunctionString());
     for (const auto constraint_strings = problem.constraintStrings();
          const auto& constraint_string : constraint_strings) {
-      std::cout << "  " << constraint_string << "\n";
+      std::println("  {}", constraint_string);
     }
-    std::cout << "Using pivot rule: " << toString(config.pivot_rule) << "\n";
-    std::cout << std::endl;
+    std::println("Using pivot rule: {}\n", toString(config.pivot_rule));
   }
 
   if (problem.numConstraints() == 0) {
-    std::cout << "Solver failed to find a solution: " << toString(ExitStatus::Unbounded) << std::endl;
+    if (config.verbose) {
+      std::println("Solver failed to find a solution: {}", toString(ExitStatus::Unbounded));
+    }
     return ExitStatus::Unbounded;
   }
 
   VectorX<Index> basic_vars;
   if (!problem.hasInitialBFS()) {
     if (config.verbose) {
-      std::cout << "No trivial BFS found, solving auxiliary LP" << std::endl;
+      std::println("No trivial BFS found, solving auxiliary LP");
     }
 
     // Set up auxiliary LP
@@ -220,17 +223,15 @@ ExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, do
       }
 
       const auto total_time = aux_profiler.totalSolveTime();
-      std::cout << std::format("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)",
-                               total_time.count(), aux_profiler.numIterations(),
-                               aux_profiler.avgIterationTime().count())
-                << "\n";
+      std::println("Auxiliary LP solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
+                   aux_profiler.numIterations(), aux_profiler.avgIterationTime().count());
 
       if (aux_exit != ExitStatus::Success) {
-        std::cout << "Solving auxiliary LP failed: " << toString(aux_exit) << "\n";
+        std::println("Solving auxiliary LP failed: {}", toString(aux_exit));
       } else if (!is_feasible) {
-        std::cout << "Solver failed to find a solution: " << toString(ExitStatus::Infeasible) << "\n";
+        std::println("Solver failed to find a solution: {}", toString(ExitStatus::Infeasible));
       }
-      std::cout << std::endl;
+      std::println();
     });
 
     if (aux_exit != ExitStatus::Success) {
@@ -273,20 +274,19 @@ ExitStatus solveSimplex(const LinearProblem& problem, Ref<VectorXd> solution, do
     }
 
     const auto total_time = profiler.totalSolveTime();
-    std::cout << std::format("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
-                             profiler.numIterations(), profiler.avgIterationTime().count())
-              << "\n";
+    std::println("Solve time: {:.3f} ms ({} iterations; {:.3f} ms average)", total_time.count(),
+                 profiler.numIterations(), profiler.avgIterationTime().count());
 
     if (exit_status != ExitStatus::Success) {
-      std::cout << "Solver failed to find a solution: " << toString(exit_status) << "\n" << std::endl;
+      std::println("Solver failed to find a solution: {}\n", toString(exit_status));
       return;
     }
 
-    std::cout << "Solution:\n";
+    std::println("Solution:");
     for (Index i = 0; i < problem.numDecisionVars(); i++) {
-      std::cout << "  x_" << i + 1 << " = " << solution(i) << "\n";
+      std::println("x_{} = {}", i + 1, solution(i));
     }
-    std::cout << "Objective value: " << objective_value << "\n" << std::endl;
+    std::println("Objective value: {}\n", objective_value);
   });
 
   if (exit_status != ExitStatus::Success) {
